@@ -17,6 +17,9 @@
     - defaults/main.yml
 
   vars:
+
+    libvirt_domain: "{{ ansible_hostname }}.blasco.id.au"
+
     # Define a default version unless overridden when calling the playbook
     vm_name: "{{ vm_hostname | default(rhel_version) }}"
     #vm_name: "{{ vm_hostname | default(vm_image [rhel_version]) }}"
@@ -41,7 +44,7 @@
     - role: stackhpc.libvirt-vm
       libvirt_vms:
         - state: "{{ vm_state | default('present') }}"
-          name: "{{ vm_name }}"
+          name: "{{ vm_name }}.{{ libvirt_domain }}"
           memory_mb: "{{ memory_mb }}"
           vcpus: "{{ vcpus }}"
           volumes:
