@@ -61,3 +61,4 @@
           interfaces:
             - network: 'vm-network-routed'
           autostart: no
+          enable_guest_virtio: true
