@@ -60,7 +60,8 @@
               type: 'file'
               device: 'cdrom'
               format: 'raw'
-              image: '/var/lib/libvirt/images/generic-seed.qcow2'
+              #image: '/var/lib/libvirt/images/generic-seed.qcow2'
+              image: "{{ vm_image_path }} /generic-seed.qcow2"
           interfaces:
             - network: 'vm-network-routed'
           autostart: no
