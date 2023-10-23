@@ -6,10 +6,7 @@
 # ansible-playbook libvirt-newvm.yml --ask-become-pass -e "rhel_version='rhel86'"
 # Note: Default state is present, and default RHEL version is defined by "rhel_version"
 #
-- hosts: localhost
-  connection: local
-
-  name: Install a VM using a role
+- name: Install a VM using a role
 
   vars_files:
     - vars/vm_image.yml
