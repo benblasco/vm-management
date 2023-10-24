@@ -8,7 +8,7 @@
 #
 - name: Install a VM using a role
 
-  hosts: all
+  hosts: "{{ hypervisor_host | default('all') }}"
 
   vars_files:
     - vars/vm_image.yml
