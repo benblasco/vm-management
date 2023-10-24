@@ -8,6 +8,8 @@
 #
 - name: Install a VM using a role
 
+  hosts: all
+
   vars_files:
     - vars/vm_image.yml
     # Probably a misuse of defaults, as defaults/main.yml is a construct used in roles
