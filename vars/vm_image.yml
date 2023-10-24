@@ -3,7 +3,7 @@
 # https://access.redhat.com/articles/6644131
 
 #vm_image_path: "/var/lib/libvirt/images/"
-vm_image_path: "/mnt/vm_images"
+vm_image_path: "/mnt/vm_images/"
 
 vm_image:
   "rhel76": "rhel-server-7.6-x86_64-kvm.qcow2"
