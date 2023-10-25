@@ -70,9 +70,9 @@
      - name: Record the stats about the new VM
        ansible.builtin.set_stats:
          data:
-           vm_hostname: "{{ vm_name }}.{{ libvirt_domain }}"
+           vm_fqdn: "{{ vm_name }}.{{ libvirt_domain }}"
 
      - name: Print the VM FQDN
        debug:
-         msg: "The VM is called {{ vm_hostname }}"
+         msg: "The VM FQDN is {{ vm_fqdn }}"
 
