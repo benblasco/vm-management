@@ -65,3 +65,14 @@
             - network: 'vm-network-routed'
           autostart: no
           enable_guest_virtio: true
+
+  post_tasks:
+     - name: Record the stats about the new VM
+       ansible.builtin.set_stats:
+         data:
+           vm_hostname: "{{ vm_name }}.{{ libvirt_domain }}"
+
+     - name: Print the VM FQDN
+       debug:
+         msg: "The VM is called {{ vm_hostname }}"
+
