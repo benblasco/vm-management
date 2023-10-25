@@ -72,7 +72,3 @@
          data:
            vm_fqdn: "{{ vm_name }}.{{ libvirt_domain }}"
          per_host: false
-
-     - name: Print the VM FQDN
-       debug:
-         msg: "The VM FQDN is {{ vm_fqdn }}"
