@@ -25,3 +25,4 @@ vm_image:
   "fedora38": "Fedora-Cloud-Base-38-1.6.x86_64.qcow2"
   "stream9": "CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2"
   "rocky9": "Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
+  "centos79": "CentOS-7-x86_64-GenericCloud-2211.qcow2"
