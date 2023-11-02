@@ -27,3 +27,6 @@ vm_image:
   "rocky9": "Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
   "arch": "Arch-Linux-x86_64-cloudimg-20231015.185166.qcow2"
   "centos79": "CentOS-7-x86_64-GenericCloud-2211.qcow2"
+  "rhel92imgbuildtest": "rhel92imgbuildtest.qcow2"
+  "rhel92partitiontest": "rhel92partitiontest.qcow2"
+  "rhel92custom.qcow2": "rhel92custom.qcow2"
