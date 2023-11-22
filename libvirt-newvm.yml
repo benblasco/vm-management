@@ -3,8 +3,8 @@
 # Read: https://github.com/stackhpc/ansible-role-libvirt-vm
 #
 # Example playbook execution:
-# ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distro_version='rhel86'"
-# Note: Default state is present, and default RHEL version is defined by "distro_version"
+# ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version='rhel86'"
+# Note: Default state is present, and default RHEL version is defined by "distribution_version"
 #
 - name: Install a VM using a role
 
@@ -20,13 +20,13 @@
     libvirt_domain: "{{ ansible_hostname }}.blasco.id.au"
 
     # Define a default version unless overridden when calling the playbook
-    vm_name: "{{ vm_hostname | default(distro_version) }}"
-    #vm_name: "{{ vm_hostname | default(vm_image [distro_version]) }}"
+    vm_name: "{{ vm_hostname | default(distribution_version) }}"
+    #vm_name: "{{ vm_hostname | default(vm_image [distribution_version]) }}"
 
   pre_tasks:
      - name: Print the variables
        debug:
-         msg: RHEL version is "{{ distro_version }}" and hostname is "{{ vm_name }}"
+         msg: RHEL version is "{{ distribution_version }}" and hostname is "{{ vm_name }}"
 
      # Temporary action due to a bug between libvirtd and some other Linux service (dbus?)
      - name: Restart libvirtd
@@ -54,7 +54,7 @@
               # capacity: '20GB'
               capacity: "{{ disk_size }}"
               pool: 'vm-pool'
-              image: "{{ vm_image_path + vm_image [ distro_version ] }}"
+              image: "{{ vm_image_path + vm_image [ distribution_version ] }}"
             - name: 'generic-seed.qcow2'
               type: 'file'
               device: 'cdrom'

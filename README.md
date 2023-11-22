@@ -6,7 +6,7 @@
 ansible-playbook libvirt-newvm.yml --ask-become-pass
 ```
 
-Note: By default, the VM hostname will match the "distro_version" (ie. distro/version) parameter:
+Note: By default, the VM hostname will match the "distribution_version" (ie. distro/version) parameter:
 
 ### Accept all defaults but have a different VM name
 
@@ -17,7 +17,7 @@ ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_name=<vm name>"
 ### Accept all defaults but have a different OS version
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distro_version=<rhel version>"
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>"
 ```
 
 Note: Please refer to vars/vm_image for all the available OS versions
@@ -31,7 +31,7 @@ ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_name=<vm name>" -e v
 ### Override parameters
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distro_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>"
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>"
 ```
 # Default variables
 
