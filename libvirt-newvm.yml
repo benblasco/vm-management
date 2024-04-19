@@ -64,6 +64,7 @@
           interfaces:
             - network: 'vm-network-routed'
           autostart: no
+          boot_firmware: efi
           enable_guest_virtio: true
 
   post_tasks:
