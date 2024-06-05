@@ -35,5 +35,4 @@ vm_image:
   "rhel92imgbuildtest": "rhel92imgbuildtest.qcow2"
   "rhel92partitiontest": "rhel92partitiontest.qcow2"
   "rhel92custom": "rhel92custom.qcow2"
-  "rhel92custom": "rhel92custom.qcow2"
   "lamp-bootc": "lamp-bootc.qcow2"
