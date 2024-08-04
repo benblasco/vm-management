@@ -1,5 +1,7 @@
 ---
-distribution_version: 'rhel93'
+distribution_version: 'rhel94'
 disk_size: '20GB'
 memory_mb: 4096
 vcpus: 1
+boot_mode: efi
+
