@@ -36,3 +36,4 @@ vm_image:
   "rhel92partitiontest": "rhel92partitiontest.qcow2"
   "rhel92custom": "rhel92custom.qcow2"
   "lamp-bootc": "lamp-bootc.qcow2"
+  "bootc-wordpress": "bootc-wordpress.qcow2"
