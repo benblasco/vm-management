@@ -39,3 +39,4 @@ vm_image:
   "lamp-bootc": "lamp-bootc.qcow2"
   "bootc-wordpress": "bootc-wordpress.qcow2"
   "satellite": "imagebuilder-satellite-isam.qcow2"
+  "idm": "imagebuilder-idm-isam.qcow2"
