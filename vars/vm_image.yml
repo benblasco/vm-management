@@ -24,6 +24,7 @@ vm_image:
   "rhel92": "rhel-9.2-x86_64-kvm.qcow2"
   "rhel93": "rhel-9.3-x86_64-kvm.qcow2"
   "rhel94": "rhel-9.4-x86_64-kvm.qcow2"
+  "rhel10beta": "rhel-10.0-beta-x86_64-kvm-image-builder.qcow2"
   "fedora36": "Fedora-Cloud-Base-36-1.5.x86_64.qcow2"
   "fedora37": "Fedora-Cloud-Base-37-1.7.x86_64.qcow2"
   "fedora38": "Fedora-Cloud-Base-38-1.6.x86_64.qcow2"
