@@ -9,14 +9,6 @@
   
   become: yes
 
-  vars:
-
-    libvirt_domain: "{{ ansible_hostname }}.blasco.id.au"
-    libvirt_ip: 192.168.3.254
-    libvirt_netmask: 255.255.255.0
-    libvirt_dhcp_start: 192.168.3.100
-    libvirt_dhcp_end: 192.168.3.200
-
   pre_tasks:
   
    # Required for rudimentary Fedora 36 support as per:

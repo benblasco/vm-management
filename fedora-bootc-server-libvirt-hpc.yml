@@ -1,15 +1,17 @@
 # ansible-galaxy install stackhpc.libvirt-host
 # Read: https://galaxy.ansible.com/stackhpc/libvirt-host
 # Read: https://github.com/stackhpc/ansible-role-libvirt-host
-- hosts: localhost
-  connection: local
+- name: Ensure that Libvirt is configured
+  hosts: fedora-bootc-testserver
+  gather_facts: yes
 
-  name: Ensure that Libvirt is configured
   
   become: yes
 
   pre_tasks:
   
+   # Required for rudimentary Fedora 36 support as per:
+   # https://github.com/stackhpc/ansible-role-libvirt-host/issues/57
    - name: Override the OS version so the role works
      ansible.utils.update_fact:
        updates:
@@ -32,10 +34,10 @@
      tags:
      - os
 
-   - name: Install genisoimage package so we can create new qcow seed images
-     dnf:
-       name: genisoimage
-       state: latest
+   #- name: Install genisoimage package so we can create new qcow seed images
+     #dnf:
+       #name: genisoimage
+       #state: present
 
   roles:
     - role: stackhpc.libvirt-host
@@ -60,10 +62,10 @@
 
   post_tasks:
 
-  - name: Install cloud utilities
-    dnf:
-      name: cloud-utils
-      state: present
+  #- name: Install cloud utilities
+    #dnf:
+      #name: cloud-utils
+      #state: present
 
   # Note: Ansible firewalld module does not natively support this, so using shell commands instead
   # https://github.com/ansible-collections/ansible.posix/issues/284

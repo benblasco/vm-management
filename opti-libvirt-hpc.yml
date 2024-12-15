@@ -8,16 +8,9 @@
   
   become: yes
 
-  vars:
-
-    libvirt_domain: "{{ ansible_hostname }}.blasco.id.au"
-    libvirt_ip: 192.168.7.254
-    libvirt_netmask: 255.255.255.0
-    libvirt_dhcp_start: 192.168.7.100
-    libvirt_dhcp_end: 192.168.7.200
-
-    # Configuration for when you need logging
-    #
+  # Configuration for when you need logging
+  #
+  # vars: 
     # libvirt_host_libvirtd_conf_enabled: true
     # libvirt_host_libvirtd_conf:
       # log_filters: "3:remote 4:event 3:util.json 3:rpc 1:*"

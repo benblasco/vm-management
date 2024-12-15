@@ -1,0 +1,5 @@
+libvirt_domain: "{{ ansible_hostname }}.blasco.id.au"
+libvirt_ip: 192.168.7.254
+libvirt_netmask: 255.255.255.0
+libvirt_dhcp_start: 192.168.7.100
+libvirt_dhcp_end: 192.168.7.200
