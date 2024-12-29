@@ -1,0 +1,95 @@
+- hosts: localhost
+  connection: local
+
+  name: Playing around with libvirt modules
+  
+  #become: yes
+  gather_facts: no
+
+  vars:
+
+    libvirt_domain: opti.blasco.id.au
+    libvirt_ip: 192.168.7.254
+    libvirt_netmask: 255.255.255.0
+    libvirt_dhcp_start: 192.168.7.100
+    libvirt_dhcp_end: 192.168.7.200
+
+    connection_uri: "qemu+ssh://bblasco@opti.lan/system"
+
+  tasks:
+    - name: Install dependency for libvirt modules
+      ansible.builtin.dnf:
+        name:
+          - python3-libvirt
+          - libvirt-daemon-driver-qemu
+        state: present
+      become: yes
+      tags: dnf
+
+    - name: Get list of all libvirt VMs
+      community.libvirt.virt:
+        #uri: connection_uri
+        uri: "qemu+ssh://bblasco@opti.lan/system"
+        command: list_vms
+      register: all_vms
+      tags: vm
+
+    - name: Print all the VMs
+      debug:
+        var: all_vms
+      tags: vm
+
+    # Helpful info here:
+    # https://www.redhat.com/sysadmin/build-VM-fast-ansible
+    - name: Get info about each VM
+      community.libvirt.virt:
+        uri: "qemu+ssh://bblasco@opti.lan/system"
+        command: nodeinfo
+        name: "{{ item }}"
+      register: vm_info
+      loop:  "{{ all_vms.list_vms }}"
+      tags: vm
+  
+    - name: Print all info about the VM
+      debug:
+        var: vm_info
+      tags: vm
+
+    - name: Print specific info about the VM
+      debug:
+        msg: "VM {{ outer_item.item }} has {{ outer_item.phymemory }}"
+      loop: "{{ vm_info.results }}"
+      loop_control:
+        loop_var: outer_item
+      tags: vm
+
+    - name: Get all the networking info
+      community.libvirt.virt_net:
+        uri: "qemu+ssh://bblasco@opti.lan/system"
+        name: vm-network-routed
+        command: facts
+      #register: network_facts
+      tags: network
+
+    # Note that task above puts facts into ansible_libvirt_networks variable
+    # without having to register the variable
+    - name: Print info about the network
+      debug:
+        var: ansible_libvirt_networks
+      tags: network
+
+    - name: Print info about the network
+      debug:
+        #var: "{{ ansible_libvirt_networks['vm-network-routed'] }}"
+        var: ansible_libvirt_networks['vm-network-routed']
+        #var: ansible_libvirt_networks[0]
+      tags: network
+
+    #- name: Print specific network info
+      #debug:
+        #var: item
+        ##var: "{{ network_info.networks.vm-network-routed }}"
+        #var: network_info.networks.vm-network-routed
+        #var: network_info.networks
+      #loop: "{{ network_info.networks }}"
+      #tags: network
