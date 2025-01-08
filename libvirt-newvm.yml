@@ -40,7 +40,7 @@
          seconds: 12
 
   roles:
-    - role: stackhpc.libvirt-vm
+    - role: benblasco.libvirt-vm
       libvirt_vms:
         - state: "{{ vm_state | default('present') }}"
           name: "{{ vm_name }}.{{ libvirt_domain }}"
