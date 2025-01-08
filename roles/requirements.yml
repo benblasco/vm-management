@@ -7,5 +7,5 @@ roles:
 # Ansible Galaxy role to quickly deploy new VMs
 # https://galaxy.ansible.com/stackhpc/libvirt-vm
 #  - src: stackhpc.libvirt-vm
-   - src: https://github.com/benblasco/ansible-role-libvirt-vm
+  - src: https://github.com/benblasco/ansible-role-libvirt-vm
 
