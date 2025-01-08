@@ -1,5 +1,5 @@
 ---
-distribution_version: 'rhel94'
+distribution_version: 'rhel95'
 disk_size: '20GB'
 memory_mb: 4096
 vcpus: 1
