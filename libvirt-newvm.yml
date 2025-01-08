@@ -40,7 +40,7 @@
          seconds: 12
 
   roles:
-    - role: libvirt-vm
+    - role: ansible-role-libvirt-vm
       libvirt_vms:
         - state: "{{ vm_state | default('present') }}"
           name: "{{ vm_name }}.{{ libvirt_domain }}"
@@ -60,6 +60,8 @@
               device: 'cdrom'
               format: 'raw'
               #image: '/var/lib/libvirt/images/generic-seed.qcow2'
+              # Path below seems to be ignored, forcing me to have the file
+              # in /var/lib/libvirt/images
               image: "{{ vm_image_path }}generic-seed.qcow2"
           interfaces:
             - network: 'vm-network-routed'
