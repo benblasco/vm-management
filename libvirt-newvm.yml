@@ -28,16 +28,16 @@
        debug:
          msg: RHEL version is "{{ distribution_version }}" and hostname is "{{ vm_name }}"
 
-     # Temporary action due to a bug between libvirtd and some other Linux service (dbus?)
-     - name: Restart libvirtd
-       become: yes
-       service:
-         name: libvirtd
-         state: restarted
-     
-     - name: Pause while libvirtd restarts
-       ansible.builtin.pause:
-         seconds: 12
+#     # Temporary action due to a bug between libvirtd and some other Linux service (dbus?)
+#     - name: Restart libvirtd
+#       become: yes
+#       service:
+#         name: libvirtd
+#         state: restarted
+#     
+#     - name: Pause while libvirtd restarts
+#       ansible.builtin.pause:
+#         seconds: 12
 
   roles:
     - role: ansible-role-libvirt-vm
