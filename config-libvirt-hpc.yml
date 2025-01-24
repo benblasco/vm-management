@@ -1,7 +1,7 @@
 # ansible-galaxy install stackhpc.libvirt-host
 # Read: https://galaxy.ansible.com/stackhpc/libvirt-host
 # Read: https://github.com/stackhpc/ansible-role-libvirt-host
-- hosts: all.lan
+- hosts: all
   #connection: local
   gather_facts: yes
 
