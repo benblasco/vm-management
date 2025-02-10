@@ -65,9 +65,10 @@
               type: 'file'
               device: 'cdrom'
               format: 'raw'
-              #image: '/var/lib/libvirt/images/generic-seed.qcow2'
-              #image: "{{ vm_image_path }}generic-seed.qcow2"
-              #image: "{{ vm_image_path }}rhel-9.3-x86_64-boot.iso"
+              # File must be located in /var/lib/libvirt/images
+              # because it's getting the base name and prepending
+              # "libvirt_vm_image_cache_path" path variable
+              image: "install.iso"
               target: 'hda'
           interfaces:
             - network: 'vm-network-routed'

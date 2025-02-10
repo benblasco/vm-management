@@ -55,14 +55,15 @@
               capacity: "{{ disk_size }}"
               pool: 'vm-pool'
               image: "{{ vm_image_path + vm_image [ distribution_version ] }}"
-            - name: 'generic-seed.qcow2'
+            - name: 'generic-seed.iso'
               type: 'file'
               device: 'cdrom'
               format: 'raw'
-              #image: '/var/lib/libvirt/images/generic-seed.qcow2'
-              # Path below seems to be ignored, forcing me to have the file
-              # in /var/lib/libvirt/images
-              image: "{{ vm_image_path }}generic-seed.qcow2"
+              #image: '/var/lib/libvirt/images/generic-seed.iso'
+              # File must be located in /var/lib/libvirt/images
+              # because it's getting the base name and prepending
+              # "libvirt_vm_image_cache_path" path variable
+              image: "generic-seed.iso"
           interfaces:
             - network: 'vm-network-routed'
           autostart: no

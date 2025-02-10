@@ -49,4 +49,4 @@ Note that the QCOW2 image must be available under `/var/lib/libvirt/images`
 
 # Cloud-init
 
-I have hard coded a cloud init seed qcow2 image at `image: '/var/lib/libvirt/images/generic-seed.qcow2'`. This code needs to be updated to give the user some flexibility not to supply a cloud-init, or to provide a path to a different qcow2 file.
+I have hard coded a cloud init seed iso image at `image: '/var/lib/libvirt/images/generic-seed.iso'`. This code needs to be updated to give the user some flexibility not to supply a cloud-init, or to provide a path to a different iso seed file.

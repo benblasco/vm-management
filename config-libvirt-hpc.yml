@@ -80,13 +80,13 @@
 
     - name: Copy cloud-init ISO
       ansible.builtin.copy:
-        src: files/generic_vm/generic-seed.qcow2
+        src: files/generic_vm/generic-seed.iso
         dest: "{{ item }}"
         owner: qemu
         group: qemu
         mode: '0644'
       loop:
-        - /mnt/vm_images/generic-seed.qcow2
-        - /var/lib/libvirt/images/generic-seed.qcow2
+        - /mnt/vm_images/generic-seed.iso
+        - /var/lib/libvirt/images/generic-seed.iso
       tags:
         - cloud-init
