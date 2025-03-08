@@ -44,3 +44,4 @@ vm_image:
   "idm": "imagebuilder-idm-isam.qcow2"
   "fedora-bootc-testserver": "fedora-bootc-testserver.qcow2"
   "test": "test.qcow2"
+  "aapnew": "aapnew.qcow2"
