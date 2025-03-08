@@ -1,7 +1,7 @@
 # ansible-galaxy install stackhpc.libvirt-host
 # Read: https://galaxy.ansible.com/stackhpc/libvirt-host
 # Read: https://github.com/stackhpc/ansible-role-libvirt-host
-- hosts: all
+- hosts: nuc.lan,opti.lan,micro.lan
   #connection: local
   gather_facts: yes
 
@@ -86,7 +86,7 @@
         group: qemu
         mode: '0644'
       loop:
-        - /mnt/vm_images/generic-seed.iso
+        - /var/mnt/vm_images/generic-seed.iso
         - /var/lib/libvirt/images/generic-seed.iso
       tags:
         - cloud-init
