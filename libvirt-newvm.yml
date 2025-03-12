@@ -63,7 +63,7 @@
               # File must be located in /var/lib/libvirt/images
               # because it's getting the base name and prepending
               # "libvirt_vm_image_cache_path" path variable
-              image: "{{ cloud_init_seed_iso }}"
+              image: "{{ vm_image_path + cloud_init_seed_iso }}"
           interfaces:
             - network: 'vm-network-routed'
           autostart: no
