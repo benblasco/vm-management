@@ -52,3 +52,17 @@ Note that the QCOW2 image must be available under the path described by `vm_imag
 There's a default cloud-init seed iso image defined in `defaults/main.yml`
 
 You can refer use the `cloud_init_seed_iso` variable to change to a different cloud-init seed image, but that image must be located in /var/lib/libvirt/images
+
+# How to generate a cloud-init seed image
+
+To generate a seed file to be used in a VM, you need the `cloud-utils-cloud-localds` package installed. Then you can use the following command to generate the image from your config file:
+
+```
+cloud-localds -v <SEED ISO FILE NAME> <CLOUD-INIT CONFIG FILE NAME>
+```
+
+e.g.
+```
+cloud-localds -v generic-seed.iso cloud_init.cfg 
+```
+
