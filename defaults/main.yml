@@ -4,4 +4,4 @@ disk_size: '20GB'
 memory_mb: 4096
 vcpus: 1
 boot_mode: efi
-
+cloud_init_seed_iso: 'generic-seed.iso'

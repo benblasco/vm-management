@@ -55,7 +55,7 @@
               capacity: "{{ disk_size }}"
               pool: 'vm-pool'
               image: "{{ vm_image_path + vm_image [ distribution_version ] }}"
-            - name: 'generic-seed.iso'
+            - name: "{{ cloud_init_seed_iso }}"
               type: 'file'
               device: 'cdrom'
               format: 'raw'

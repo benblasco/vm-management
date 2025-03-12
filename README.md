@@ -31,7 +31,7 @@ ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_name=<vm name>" -e v
 ### Override parameters
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>"
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>" -e "cloud_init_seed_iso=<iso file name>"
 ```
 # Default variables
 
@@ -45,8 +45,10 @@ See `defaults/main.yml` for default values of:
 
 See `vars/vm_image.yml`
 
-Note that the QCOW2 image must be available under `/var/lib/libvirt/images`
+Note that the QCOW2 image must be available under the path described by `vm_image_path` defined in `vars/vm_image.yml`
 
 # Cloud-init
 
-I have hard coded a cloud init seed iso image at `image: '/var/lib/libvirt/images/generic-seed.iso'`. This code needs to be updated to give the user some flexibility not to supply a cloud-init, or to provide a path to a different iso seed file.
+There's a default cloud-init seed iso image defined in `defaults/main.yml`
+
+You can refer use the `cloud_init_seed_iso` variable to change to a different cloud-init seed image, but that image must be located in /var/lib/libvirt/images
