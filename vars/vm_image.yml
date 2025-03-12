@@ -46,4 +46,4 @@ vm_image:
   "test": "test.qcow2"
   "aapnew": "aapnew.qcow2"
   "bblasco-rhel-9-lamp-ib": "bblasco-rhel-9-lamp-ib.qcow2"
-  "redhat-image-mode-actions" "redhat-image-mode-actions.qcow2"
+  "redhat-image-mode-actions": "redhat-image-mode-actions.qcow2"
