@@ -45,3 +45,4 @@ vm_image:
   "fedora-bootc-testserver": "fedora-bootc-testserver.qcow2"
   "test": "test.qcow2"
   "aapnew": "aapnew.qcow2"
+  "bblasco-rhel-9-lamp-ib.qcow2": "bblasco-rhel-9-lamp-ib.qcow2"
