@@ -31,7 +31,7 @@ ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_name=<vm name>" -e v
 ### Override parameters
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>" -e "cloud_init_seed_iso=<iso file name>"
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>" -e "cloud_init_seed_iso=<iso file name>" -e "boot_mode=<boot mode>"
 ```
 # Default variables
 
@@ -40,6 +40,8 @@ See `defaults/main.yml` for default values of:
 - Disk size
 - Memory
 - vCPUs
+- Boot mode (which can be `efi` or `bios`). Note: RHEL 7 hosts must be overridden to `bios`, else they will not boot
+- Cloud-init seed ISO file
 
 # Available distributions
 
