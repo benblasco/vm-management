@@ -46,3 +46,4 @@ vm_image:
   "bblasco-rhel-9-lamp-ib": "bblasco-rhel-9-lamp-ib.qcow2"
   "redhat-image-mode-actions": "redhat-image-mode-actions.qcow2"
   "ubuntu24": "noble-server-cloudimg-amd64.img"
+  "provisioner": "bblasco-rhis-rhel9-provisioner.qcow2"
