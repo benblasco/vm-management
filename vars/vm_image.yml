@@ -26,6 +26,7 @@ vm_image:
   "rhel94": "rhel-9.4-x86_64-kvm.qcow2"
   "rhel95": "rhel-9.5-x86_64-kvm.qcow2"
   "rhel10beta": "rhel-10.0-beta-x86_64-kvm-image-builder.qcow2"
+  "rhel100": "rhel-10.0-x86_64-kvm.qcow2"
   "fedora41": "Fedora-Cloud-Base-Generic-41-1.4.x86_64.qcow2"
   "stream8": "CentOS-Stream-GenericCloud-8-latest.x86_64.qcow2"
   "stream9": "CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2"
