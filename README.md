@@ -43,6 +43,22 @@ See `defaults/main.yml` for default values of:
 - Boot mode (which can be `efi` or `bios`). Note: RHEL 7 hosts must be overridden to `bios`, else they will not boot
 - Cloud-init seed ISO file
 
+# Resolving JSON errors on Fedora 43+
+
+From Fedora 43 onwards I have been getting errors when creating and destroying VMs via the playbook, which look like:
+```
+TASK [ansible-role-libvirt-vm : Ensure the VM disk volumes exist] **************
+An exception occurred during task execution. To see the full traceback, use -vvv. The error was: json.decoder.JSONDecodeError: Extra data: line 2 column 1 (char 19)
+fatal: [nuc.lan]: FAILED! => {"msg": "Unexpected failure during module execution: Extra data: line 2 column 1 (char 19)", "stdout": ""}
+```
+
+This is resolved by setting the following in the inventory variables for each hypervisor:
+```
+ansible_ssh_common_args: '-o SetEnv=\"TERM=dumb\"'
+```
+
+Note: The character escaping shown above is required. Please do not confuse this for a typo or a formatting error in this README.
+
 # Available distributions
 
 See `vars/vm_image.yml`
