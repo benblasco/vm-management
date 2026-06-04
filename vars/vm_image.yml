@@ -51,3 +51,4 @@ vm_image:
   "redhat-image-mode-actions": "redhat-image-mode-actions.qcow2"
   "ubuntu24": "noble-server-cloudimg-amd64.img"
   "provisioner": "bblasco-rhis-rhel9-provisioner.qcow2"
+  "bblasco-rhel-9-rhis-aap": "bblasco-rhel-9-rhis-aap.qcow2"
