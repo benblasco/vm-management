@@ -71,7 +71,7 @@
               image: "install.iso"
               target: 'hda'
           interfaces:
-            - network: 'vm-network-routed'
+            - network: "{{ vm_host_network }}"
           autostart: no
           start: no
           boot_firmware: efi

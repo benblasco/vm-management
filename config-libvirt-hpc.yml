@@ -43,6 +43,18 @@
   roles:
     - role: stackhpc.libvirt-host
       become: no
+      # Bootc images must ship with libvirt/QEMU pre-installed; skip package
+      # install on hypervisor hosts. libvirt_host_install_daemon: false skips
+      # tasks/install-daemon.yml (and libvirtd reconfiguration in config.yml).
+      # Required daemon packages are listed there and in vars/RedHat.yml
+      # (e.g. libvirt, libvirt-daemon-kvm, qemu-kvm).
+      # libvirt_host_install_client: false is also required: when the daemon
+      # install is disabled, the role runs install-client.yml instead, which
+      # fails on Fedora/bootc (RHEL package names under the OS override, and
+      # an Ansible package-module error). Client packages (python3-libvirt,
+      # libvirt-client) must be present in the bootc image too.
+      libvirt_host_install_daemon: false
+      libvirt_host_install_client: false
       libvirt_host_networks:
         - name: vm-network-routed
           mode: route
@@ -52,6 +64,9 @@
           netmask: "{{ libvirt_netmask }}"
           dhcp_start: "{{ libvirt_dhcp_start }}"
           dhcp_end: "{{ libvirt_dhcp_end }}"
+        - name: vm-network-vlan140
+          mode: bridge
+          bridge: br140
       libvirt_host_pools:
         - name: vm-pool
           type: dir

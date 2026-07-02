@@ -31,8 +31,19 @@ ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_name=<vm name>" -e v
 ### Override parameters
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>" -e "cloud_init_seed_iso=<iso file name>" -e "boot_mode=<boot mode>"
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>" -e "cloud_init_seed_iso=<iso file name>" -e "boot_mode=<boot mode>" -e "vm_host_network=<libvirt network name>"
 ```
+
+### Attach a VM to a different libvirt network
+
+By default, VMs use the `vm-network-routed` libvirt network (NAT/routed). To attach a VM to VLAN 140 instead, override `vm_host_network`:
+
+```
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_host_network=vm-network-vlan140"
+```
+
+The same variable applies to `libvirt-isoinstall.yml`. The `vm-network-vlan140` network must exist on the hypervisor (defined by `config-libvirt-hpc.yml`).
+
 # Default variables
 
 See `defaults/main.yml` for default values of:
@@ -42,6 +53,7 @@ See `defaults/main.yml` for default values of:
 - vCPUs
 - Boot mode (which can be `efi` or `bios`). Note: RHEL 7 hosts must be overridden to `bios`, else they will not boot
 - Cloud-init seed ISO file
+- Libvirt network (`vm_host_network`; default `vm-network-routed`)
 
 # Resolving JSON errors on Fedora 43+
 

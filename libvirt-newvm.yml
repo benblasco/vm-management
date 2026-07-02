@@ -65,7 +65,7 @@
               # "libvirt_vm_image_cache_path" path variable
               image: "{{ vm_image_path + cloud_init_seed_iso }}"
           interfaces:
-            - network: 'vm-network-routed'
+            - network: "{{ vm_host_network }}"
           autostart: no
           boot_firmware: "{{ boot_mode }}"
           enable_guest_virtio: true
