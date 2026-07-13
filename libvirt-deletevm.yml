@@ -1,0 +1,75 @@
+# ansible-galaxy install stackhpc.libvirt-vm
+# Read: https://galaxy.ansible.com/stackhpc/libvirt-vm
+# Read: https://github.com/stackhpc/ansible-role-libvirt-vm
+#
+# Example playbook execution:
+# ansible-playbook libvirt-deletevm.yml --ask-become-pass -e "vm_hostname=<vm name>"
+#
+- name: Delete a VM using a role
+
+  hosts: "{{ hypervisor_host | default('all') }}"
+
+  vars_files:
+    - defaults/main.yml
+
+  vars:
+
+    libvirt_domain: "{{ vm_domain }}"
+    vm_name: "{{ vm_hostname }}"
+    libvirt_vm_fqdn: "{{ vm_name }}.{{ libvirt_domain }}"
+
+  pre_tasks:
+    - name: Require vm_hostname
+      ansible.builtin.assert:
+        that:
+          - vm_hostname is defined
+          - vm_hostname | length > 0
+        fail_msg: "Pass the VM short name with -e vm_hostname=<name>"
+
+    - name: Print the VM to delete
+      ansible.builtin.debug:
+        msg: "Deleting VM {{ libvirt_vm_fqdn }}"
+
+    - name: List defined libvirt domains
+      community.libvirt.virt:
+        command: list_vms
+      register: libvirt_defined_vms
+      become: true
+
+    - name: Get domain XML for NVRAM detection
+      ansible.builtin.command:
+        cmd: virsh dumpxml {{ libvirt_vm_fqdn }}
+      register: vm_domain_xml
+      become: true
+      changed_when: false
+      when: libvirt_vm_fqdn in libvirt_defined_vms.list_vms
+
+    - name: Set boot_firmware from domain XML
+      ansible.builtin.set_fact:
+        detected_boot_firmware: "{{ 'efi' if '<nvram' in vm_domain_xml.stdout else 'bios' }}"
+      when: libvirt_vm_fqdn in libvirt_defined_vms.list_vms
+
+    - name: Set boot_firmware when domain is not defined
+      ansible.builtin.set_fact:
+        detected_boot_firmware: bios
+      when: libvirt_vm_fqdn not in libvirt_defined_vms.list_vms
+
+    - name: Print detected boot firmware
+      ansible.builtin.debug:
+        msg: >-
+          Domain {{ libvirt_vm_fqdn }}:
+          {% if libvirt_vm_fqdn in libvirt_defined_vms.list_vms %}
+          boot_firmware={{ detected_boot_firmware }} (detected from domain XML)
+          {% else %}
+          not defined; boot_firmware={{ detected_boot_firmware }} (unused)
+          {% endif %}
+
+  roles:
+    - role: ansible-role-libvirt-vm
+      libvirt_vms:
+        - state: absent
+          name: "{{ libvirt_vm_fqdn }}"
+          boot_firmware: "{{ detected_boot_firmware }}"
+          volumes:
+            - name: "{{ vm_name }}"
+              pool: vm-pool

@@ -25,8 +25,23 @@ Note: Please refer to vars/vm_image for all the available OS versions
 ### Delete a VM
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_hostname=<vm name>" -e "vm_state=absent"
+ansible-playbook libvirt-deletevm.yml --ask-become-pass -e "vm_hostname=<vm name>"
 ```
+
+The libvirt domain name is `{vm_hostname}.{vm_domain}` (e.g. `rhel101.nuc.blasco.id.au` on `nuc.lan` with defaults). The disk volume in `vm-pool` is named after the short `vm_hostname` only (e.g. `rhel101`). Boot firmware (EFI vs BIOS, and whether `virsh undefine --nvram` is used) is detected automatically from the domain XML when the VM exists.
+
+Optional overrides:
+
+```
+ansible-playbook libvirt-deletevm.yml --ask-become-pass \
+  -e "vm_hostname=<vm name>" \
+  -e "vm_domain=<domain>" \
+  -e "hypervisor_host=<host>"
+```
+
+Pass `vm_domain` only if the VM was created with a non-default domain. `vm_domain` affects the libvirt domain name, not the disk volume name.
+
+Note: `libvirt-newvm.yml -e vm_state=absent` still works but is no longer the recommended path.
 
 ### Override parameters
 
