@@ -17,7 +17,7 @@
 
   vars:
 
-    libvirt_domain: "{{ domain }}"
+    libvirt_domain: "{{ vm_domain }}"
 
     # Define a default version unless overridden when calling the playbook
     vm_name: "{{ vm_hostname | default(distribution_version) }}"
@@ -74,7 +74,7 @@
             - network: "{{ vm_host_network }}"
           autostart: no
           start: no
-          boot_firmware: efi
+          boot_firmware: "{{ boot_mode }}"
           enable_guest_virtio: true
 
   post_tasks:

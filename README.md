@@ -11,7 +11,7 @@ Note: By default, the VM hostname will match the "distribution_version" (ie. dis
 ### Accept all defaults but have a different VM name
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_name=<vm name>"
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_hostname=<vm name>"
 ```
 
 ### Accept all defaults but have a different OS version
@@ -25,7 +25,7 @@ Note: Please refer to vars/vm_image for all the available OS versions
 ### Delete a VM
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_name=<vm name>" -e vm_state=absent"
+ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_hostname=<vm name>" -e "vm_state=absent"
 ```
 
 ### Override parameters

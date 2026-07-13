@@ -7,3 +7,11 @@ boot_mode: efi
 cloud_init_seed_iso: 'generic-seed.iso'
 vm_host_network: vm-network-routed
 vm_domain: "{{ ansible_hostname }}.blasco.id.au"
+
+# Cloud-init network config variables (used by cloud_init_network_config.cfg.j2)
+# These must be overridden via -e when generating a static-IP seed ISO.
+vm_mac_address: ''
+vm_ip_address: ''
+vm_ip_prefix: '24'
+vm_ip_gateway: ''
+vm_ip_nameservers: []
