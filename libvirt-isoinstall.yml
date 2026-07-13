@@ -72,8 +72,8 @@
               target: 'hda'
           interfaces:
             - network: "{{ vm_host_network }}"
-          autostart: no
-          start: no
+          autostart: "{{ vm_autostart }}"
+          start: "{{ vm_start }}"
           boot_firmware: "{{ boot_mode }}"
           enable_guest_virtio: true
 
