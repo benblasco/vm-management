@@ -1,0 +1,45 @@
+---
+# Generate a cloud-init seed ISO on a hypervisor host.
+#
+# The role renders user-data (always) and network-config (when vm_ip_address is
+# non-empty) on the remote host and calls cloud-localds to produce a seed ISO
+# at {{ vm_image_path }}{{ vm_hostname }}-seed.iso.
+#
+# Prerequisites:
+#   - cloud-utils-cloud-localds must be installed in the hypervisor's bootc image
+#   - vars/vm_image.yml must supply vm_image_path (currently /mnt/vm_images/)
+#
+# DHCP / no static IP (network-config not injected):
+#
+#   ansible-playbook generate-cloud-init-seed.yml --ask-become-pass \
+#     -e hypervisor_host=nuc.lan \
+#     -e vm_hostname=my-rhis-vm
+#
+# Static IP (network-config injected):
+#
+#   ansible-playbook generate-cloud-init-seed.yml --ask-become-pass \
+#     -e hypervisor_host=nuc.lan \
+#     -e vm_hostname=my-rhis-vm \
+#     -e vm_ip_address=192.168.140.99 \
+#     -e vm_ip_prefix=22 \
+#     -e vm_ip_gateway=192.168.140.1 \
+#     -e 'vm_ip_nameservers=["192.168.1.3","192.168.1.7"]' \
+#     -e vm_mac_address=52:54:00:12:34:56
+#
+# Then deploy the VM using the generated ISO:
+#
+#   ansible-playbook libvirt-newvm.yml --ask-become-pass \
+#     -e vm_hostname=my-rhis-vm \
+#     -e cloud_init_seed_iso=my-rhis-vm-seed.iso \
+#     -e vm_host_network=vm-network-vlan140
+
+- name: Generate a cloud-init seed ISO on the hypervisor
+  hosts: "{{ hypervisor_host | default('all') }}"
+  become: true
+
+  vars_files:
+    - vars/vm_image.yml
+    - defaults/main.yml
+
+  roles:
+    - role: generate-cloud-init-iso

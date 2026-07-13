@@ -1,0 +1,22 @@
+---
+# Output ISO filename — defaults to <vm_hostname>-seed.iso
+generate_cloud_init_iso_filename: "{{ vm_hostname }}-seed.iso"
+
+# Full destination path on the hypervisor; vm_image_path must be provided by the caller
+# (e.g. by including vars/vm_image.yml in the playbook)
+generate_cloud_init_iso_dest: "{{ vm_image_path }}{{ generate_cloud_init_iso_filename }}"
+
+# Ephemeral working directory used to stage rendered templates before ISO generation
+generate_cloud_init_work_dir: "/tmp/ansible-cloud-init-{{ vm_hostname }}"
+
+# Ownership of the generated ISO (matches libvirt qemu conventions in this repo)
+generate_cloud_init_iso_owner: qemu
+generate_cloud_init_iso_group: qemu
+generate_cloud_init_iso_mode: "0644"
+
+# Package that provides cloud-localds; must be pre-installed in the bootc image —
+# this role will NOT install it, only verify its presence.
+generate_cloud_init_package: cloud-utils-cloud-localds
+
+# Binary name provided by the package above
+generate_cloud_init_command: cloud-localds

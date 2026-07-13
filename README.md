@@ -79,6 +79,8 @@ Note that the QCOW2 image must be available under the path described by `vm_imag
 
 # Cloud-init
 
+> **Stale — scheduled for removal.** This section describes a manual `cloud-localds` workflow and an incorrect seed path (`/var/lib/libvirt/images`). See [`README.generate-cloud-init-iso-role.md`](README.generate-cloud-init-iso-role.md) for the current Ansible role and usage.
+
 There's a default cloud-init seed iso image defined in `defaults/main.yml`
 
 You can refer use the `cloud_init_seed_iso` variable to change to a different cloud-init seed image, but that image must be located in /var/lib/libvirt/images

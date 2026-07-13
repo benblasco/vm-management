@@ -1,0 +1,124 @@
+---
+# Assert variables that must always be provided
+- name: Assert required variables are set
+  ansible.builtin.assert:
+    that:
+      - vm_hostname is defined and vm_hostname | length > 0
+      - vm_image_path is defined and vm_image_path | length > 0
+    fail_msg: >-
+      Both vm_hostname and vm_image_path must be defined and non-empty.
+      Include vars/vm_image.yml in your playbook to supply vm_image_path.
+
+# When a static IP is requested, all network variables must be explicitly set
+- name: Assert network variables are set when vm_ip_address is provided
+  ansible.builtin.assert:
+    that:
+      - vm_mac_address | length > 0
+      - vm_ip_gateway | length > 0
+      - vm_ip_nameservers | length > 0
+    fail_msg: >-
+      vm_ip_address is set but one or more required network variables are empty.
+      Provide vm_mac_address, vm_ip_gateway, and vm_ip_nameservers.
+  when: vm_ip_address | length > 0
+
+# Ensure destination directory exists and is accessible to qemu
+- name: Ensure ISO destination directory exists
+  ansible.builtin.file:
+    path: "{{ vm_image_path }}"
+    state: directory
+    owner: "{{ generate_cloud_init_iso_owner }}"
+    group: "{{ generate_cloud_init_iso_group }}"
+    mode: "0755"
+  become: true
+
+# Verify the package is installed — bootc images are immutable, so we never install it
+- name: Check cloud-utils-cloud-localds package is installed
+  ansible.builtin.command: rpm -q {{ generate_cloud_init_package }}
+  register: cloud_localds_pkg_check
+  changed_when: false
+  failed_when: false
+
+- name: Fail when cloud-utils-cloud-localds is not installed
+  ansible.builtin.fail:
+    msg: >-
+      Package {{ generate_cloud_init_package }} is not installed on {{ inventory_hostname }}.
+      It must be included in the bootc image (provides the {{ generate_cloud_init_command }} binary).
+  when: cloud_localds_pkg_check.rc != 0
+
+# Check whether a seed ISO already exists so we can decide whether to regenerate
+- name: Check whether seed ISO already exists
+  ansible.builtin.stat:
+    path: "{{ generate_cloud_init_iso_dest }}"
+  register: existing_iso
+
+# Create an ephemeral working directory to stage rendered templates
+- name: Create ephemeral working directory
+  ansible.builtin.file:
+    path: "{{ generate_cloud_init_work_dir }}"
+    state: directory
+    mode: "0700"
+
+# Render user-data cloud-config from the role-local template
+- name: Render user-data template
+  ansible.builtin.template:
+    src: cloud_init_user_data.cfg.j2
+    dest: "{{ generate_cloud_init_work_dir }}/user-data.cfg"
+    mode: "0600"
+  register: user_data_rendered
+
+# Render network-config only when a static IP address has been provided
+- name: Render network-config template
+  ansible.builtin.template:
+    src: cloud_init_network_config.cfg.j2
+    dest: "{{ generate_cloud_init_work_dir }}/network-config.cfg"
+    mode: "0600"
+  register: network_config_rendered
+  when: vm_ip_address | length > 0
+
+# Generate seed ISO without network config (DHCP / no static IP).
+# Runs when either a template was re-rendered or no ISO exists yet.
+- name: Generate seed ISO (no network config)
+  ansible.builtin.command: >-
+    {{ generate_cloud_init_command }} -v
+    {{ generate_cloud_init_iso_dest }}
+    {{ generate_cloud_init_work_dir }}/user-data.cfg
+  when:
+    - vm_ip_address | length == 0
+    - user_data_rendered.changed or not existing_iso.stat.exists
+  changed_when: true
+  become: true
+
+# Generate seed ISO with network config (static IP).
+# Runs when either template was re-rendered or no ISO exists yet.
+- name: Generate seed ISO (with network config)
+  ansible.builtin.command: >-
+    {{ generate_cloud_init_command }} -v
+    --network-config={{ generate_cloud_init_work_dir }}/network-config.cfg
+    {{ generate_cloud_init_iso_dest }}
+    {{ generate_cloud_init_work_dir }}/user-data.cfg
+  when:
+    - vm_ip_address | length > 0
+    - user_data_rendered.changed or network_config_rendered.changed or not existing_iso.stat.exists
+  changed_when: true
+  become: true
+
+# Set ownership on the generated ISO to match libvirt qemu conventions
+- name: Set ISO file ownership
+  ansible.builtin.file:
+    path: "{{ generate_cloud_init_iso_dest }}"
+    owner: "{{ generate_cloud_init_iso_owner }}"
+    group: "{{ generate_cloud_init_iso_group }}"
+    mode: "{{ generate_cloud_init_iso_mode }}"
+  become: true
+
+# Remove the ephemeral working directory — rendered templates are no longer needed
+- name: Remove ephemeral working directory
+  ansible.builtin.file:
+    path: "{{ generate_cloud_init_work_dir }}"
+    state: absent
+
+# Expose the generated ISO filename so callers can chain directly into libvirt-newvm.yml
+- name: Expose generated ISO filename as fact
+  ansible.builtin.set_fact:
+    cloud_init_seed_iso: "{{ generate_cloud_init_iso_filename }}"
+    generate_cloud_init_iso_path: "{{ generate_cloud_init_iso_dest }}"

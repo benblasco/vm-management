@@ -24,10 +24,15 @@ ethernets:
       macaddress: "{{ vm_mac_address }}"
     addresses:
       - {{ vm_ip_address }}/{{ vm_ip_prefix }}
-    routes:
-      - to: default
-        via: {{ vm_ip_gateway }}
+    # routes:
+    #   - to: default
+    #     via: {{ vm_ip_gateway }}
+    gateway4: {{ vm_ip_gateway }}
     nameservers:
-      addresses: {{ vm_ip_nameservers }}
+      addresses:
+{% set ns_list = vm_ip_nameservers if vm_ip_nameservers is not string else (vm_ip_nameservers | from_yaml) %}
+{% for ns in ns_list %}
+        - {{ ns }}
+{% endfor %}
       search:
         - {{ vm_domain }}

@@ -6,32 +6,40 @@ package_upgrade: false
 users:
   - name: bblasco
     sudo: ALL=(ALL) NOPASSWD:ALL
-    #primary_group: bblasco
     groups: wheel
-    home: /home/bblasco
+    # home: /home/bblasco
     shell: /bin/bash
+    # passwd + lock_passwd: false together let cloud-init set and unlock the
+    # account password in the users module, avoiding the lock_passwd warning
+    # introduced in cloud-init 22.2.
     lock_passwd: false
-    ssh-authorized-keys:
+    passwd: bblasco
+    plain_text_passwd: bblasco
+    ssh_authorized_keys:
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCY9P2Hh1ultuvNlBGHxQGNYlDkB35Z/kPQNR+tfsYaO2gGLhbtkVI0uoXf5SewEz5ecH+u8jHIPElXZz227h5PpxhZFzfokqUJ/U3mbEpu1/Krf4/eERCqIgz2nmXoGLlOJHgMk4MpK6LA6eb6SXZHLpxFicbEcCxUU3A9hbzhWUGDaMFG7CcExT5JAD/7VcniONxZhlJxUzyL1xmbmAN13DQpiUkew25VtuNHby1fYTgMxVaezUMfMwZn6qpNJUDXGCKX1NWv5kqB9yFxRIQbFS4zAkQPXH6w7eksNyknexRDwM1zghnaspSvE1Kn2RWIaKt5hmaoKozJuC9YnCwJ bblasco@localhost.localdomain
   - name: ansiblerunner
     sudo: ALL=(ALL) NOPASSWD:ALL
-    #primary_group: bblasco
     groups: wheel
-    home: /home/ansiblerunner
+    # home: /home/ansiblerunner
     shell: /bin/bash
     lock_passwd: false
-    ssh-authorized-keys:
+    #passwd: ansiblerunner
+    plain_text_passwd: ansiblerunner
+    ssh_authorized_keys:
       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCY9P2Hh1ultuvNlBGHxQGNYlDkB35Z/kPQNR+tfsYaO2gGLhbtkVI0uoXf5SewEz5ecH+u8jHIPElXZz227h5PpxhZFzfokqUJ/U3mbEpu1/Krf4/eERCqIgz2nmXoGLlOJHgMk4MpK6LA6eb6SXZHLpxFicbEcCxUU3A9hbzhWUGDaMFG7CcExT5JAD/7VcniONxZhlJxUzyL1xmbmAN13DQpiUkew25VtuNHby1fYTgMxVaezUMfMwZn6qpNJUDXGCKX1NWv5kqB9yFxRIQbFS4zAkQPXH6w7eksNyknexRDwM1zghnaspSvE1Kn2RWIaKt5hmaoKozJuC9YnCwJ bblasco@localhost.localdomain
 
-# only cert auth via ssh (console access can still login)
+# Allow password authentication via SSH and console
 ssh_pwauth: true
 disable_root: false
+
+# Modern chpasswd format (chpasswd.list multiline string was deprecated in 22.2).
+# Only root is listed here; named users above have their passwords set inline.
 chpasswd:
-  list: |
-     root:root
-     bblasco:bblasco
-     ansiblerunner:ansiblerunner
-  expire: False
+  expire: false
+  users:
+    - name: root
+      password: root
+      type: text
 
 # Enable the QEMU agent so I can get info about the system:
 # Following guidance from:
