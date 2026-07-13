@@ -59,10 +59,10 @@
               type: 'file'
               device: 'cdrom'
               format: 'raw'
-              #image: '/var/lib/libvirt/images/generic-seed.iso'
-              # File must be located in /var/lib/libvirt/images
-              # because it's getting the base name and prepending
-              # "libvirt_vm_image_cache_path" path variable
+              # file_path sets the directory in the libvirt XML <source file=.../>;
+              # without it the role falls back to libvirt_volume_default_images_path
+              # (/var/lib/libvirt/images), which differs from vm_image_path.
+              file_path: "{{ vm_image_path }}"
               image: "{{ vm_image_path + cloud_init_seed_iso }}"
           interfaces:
             - network: "{{ vm_host_network }}"
