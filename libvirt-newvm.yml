@@ -62,11 +62,13 @@
               # file_path sets the directory in the libvirt XML <source file=.../>;
               # without it the role falls back to libvirt_volume_default_images_path
               # (/var/lib/libvirt/images), which differs from vm_image_path.
+              # image: is intentionally omitted — for type: 'file' it is unused by
+              # the role but would trigger a wasteful copy to libvirt_vm_image_cache_path.
               file_path: "{{ vm_image_path }}"
-              image: "{{ vm_image_path + cloud_init_seed_iso }}"
           interfaces:
             - network: "{{ vm_host_network }}"
-          autostart: no
+          autostart: "{{ vm_autostart }}"
+          start: "{{ vm_start }}"
           boot_firmware: "{{ boot_mode }}"
           enable_guest_virtio: true
 
