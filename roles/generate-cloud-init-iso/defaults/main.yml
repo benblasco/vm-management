@@ -5,6 +5,7 @@ generate_cloud_init_iso_filename: "{{ vm_hostname }}-seed.iso"
 # Full destination path on the hypervisor; vm_image_path must be provided by the caller
 # (e.g. by including vars/vm_image.yml in the playbook)
 generate_cloud_init_iso_dest: "{{ vm_image_path }}{{ generate_cloud_init_iso_filename }}"
+generate_cloud_init_iso_dest: "{{ libvirt_volume_default_images_path }}{{ generate_cloud_init_iso_filename }}"
 
 # Ephemeral working directory used to stage rendered templates before ISO generation
 generate_cloud_init_work_dir: "/tmp/ansible-cloud-init-{{ vm_hostname }}"
