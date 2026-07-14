@@ -1,0 +1,120 @@
+# ansible-galaxy install stackhpc.libvirt-vm
+# Read: https://galaxy.ansible.com/stackhpc/libvirt-vm
+# Read: https://github.com/stackhpc/ansible-role-libvirt-vm
+#
+# Creates a VM with an auto-generated cloud-init seed ISO in a single playbook.
+#
+# The playbook:
+#   1. Defines the VM (without starting it) using the libvirt-vm role
+#   2. Retrieves the auto-assigned MAC address from the domain XML
+#   3. Generates a per-VM cloud-init seed ISO (with static network config when
+#      vm_ip_address is set, using the retrieved MAC for NIC matching)
+#   4. Starts the VM if vm_start is true
+#
+# DHCP example:
+#   ansible-playbook libvirt-createvm.yml --ask-become-pass \
+#     -e vm_hostname=myvm
+#
+# Static IP example:
+  # ansible-playbook libvirt-createvm.yml \
+  #   -e vm_hostname=staticipvm \
+  #   -e vm_ip_address=192.168.140.98 \
+  #   -e vm_ip_prefix=22 \
+  #   -e vm_ip_gateway=192.168.140.1 \
+  #   -e 'vm_ip_nameservers=["192.168.1.3","192.168.1.7"]' \
+  #   -e vm_start=yes
+#
+- name: Create a VM with integrated cloud-init
+
+  hosts: "{{ hypervisor_host | default('all') }}"
+
+  vars_files:
+    - vars/vm_image.yml
+    - defaults/main.yml
+
+  vars:
+    libvirt_domain: "{{ vm_domain }}"
+
+  pre_tasks:
+    - name: Default vm_hostname to distribution_version if not provided
+      ansible.builtin.set_fact:
+        vm_hostname: "{{ distribution_version }}"
+      when: vm_hostname is not defined or vm_hostname | length == 0
+
+    - name: Set derived variables
+      ansible.builtin.set_fact:
+        libvirt_vm_fqdn: "{{ vm_hostname }}.{{ libvirt_domain }}"
+
+    - name: Print the variables
+      ansible.builtin.debug:
+        msg: >-
+          Distribution is "{{ distribution_version }}",
+          hostname is "{{ vm_hostname }}",
+          FQDN is "{{ libvirt_vm_fqdn }}"
+
+  tasks:
+    # Step 1 — Define the VM without starting it
+    - name: Create the VM (defined, not started)
+      ansible.builtin.include_role:
+        name: ansible-role-libvirt-vm
+      vars:
+        libvirt_vms:
+          - state: 'present'
+            name: "{{ libvirt_vm_fqdn }}"
+            memory_mb: "{{ memory_mb }}"
+            vcpus: "{{ vcpus }}"
+            volumes:
+              - name: "{{ vm_hostname }}"
+                device: 'disk'
+                format: 'qcow2'
+                capacity: "{{ disk_size }}"
+                pool: 'vm-pool'
+                image: "{{ vm_image_path + vm_image[distribution_version] }}"
+              - name: "{{ cloud_init_seed_iso }}"
+                type: 'file'
+                device: 'cdrom'
+                format: 'raw'
+                file_path: "{{ vm_image_path }}"
+            interfaces:
+              - network: "{{ vm_host_network }}"
+            autostart: "{{ vm_autostart }}"
+            start: false
+            boot_firmware: "{{ boot_mode }}"
+            enable_guest_virtio: true
+
+    # Step 2 — Retrieve the VM's MAC address from the domain XML
+    - name: Get VM XML definition
+      community.libvirt.virt:
+        command: get_xml
+        name: "{{ libvirt_vm_fqdn }}"
+      register: vm_xml_result
+      become: true
+
+    - name: Extract MAC address from VM XML
+      ansible.builtin.set_fact:
+        vm_mac_address: "{{ vm_xml_result.get_xml | regex_search(\"<mac address='([^']+)'\", '\\1') | first }}"
+
+    - name: Display retrieved MAC address
+      ansible.builtin.debug:
+        msg: "VM {{ libvirt_vm_fqdn }} MAC address: {{ vm_mac_address }}"
+
+    # Step 3 — Generate the cloud-init seed ISO
+    - name: Generate cloud-init seed ISO
+      ansible.builtin.include_role:
+        name: generate-cloud-init-iso
+
+    # Step 4 — Start the VM if requested
+    - name: Start the VM
+      community.libvirt.virt:
+        name: "{{ libvirt_vm_fqdn }}"
+        state: running
+      become: true
+      when: vm_start | bool
+
+  post_tasks:
+    - name: Record the stats about the new VM
+      ansible.builtin.set_stats:
+        data:
+          vm_fqdn: "{{ libvirt_vm_fqdn }}"
+          vm_mac_address: "{{ vm_mac_address }}"
+        per_host: false
