@@ -64,7 +64,7 @@
             memory_mb: "{{ memory_mb }}"
             vcpus: "{{ vcpus }}"
             volumes:
-              - name: "{{ vm_hostname }}"
+              - name: "{{ libvirt_vm_fqdn }}"
                 device: 'disk'
                 format: 'qcow2'
                 capacity: "{{ disk_size }}"
