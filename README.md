@@ -33,7 +33,7 @@ See [Available distributions](#available-distributions) for all supported `distr
 
 ### DHCP networking (no static IP)
 
-When `vm_ip_address` is omitted or empty, the integrated `generate-cloud-init-iso` role builds a seed ISO with **user-data only** (no `network-config`). The guest NIC obtains an address via **DHCP on the libvirt network** specified by `vm_host_network`.
+When `vm_ip_address` is omitted or empty, the integrated `generate-cloud-init-iso` role builds a seed ISO with **user-data only** (no `network-config`). The guest NIC obtains an address via **DHCP on the libvirt network** specified by `vm_host_network`. `vm_ip_gateway`, `vm_ip_nameservers`, and `vm_ip_prefix` are ignored unless `vm_ip_address` is set.
 
 ```
 ansible-playbook libvirt-createvm.yml --ask-become-pass \
@@ -43,7 +43,7 @@ ansible-playbook libvirt-createvm.yml --ask-become-pass \
 
 ### Static IP networking
 
-When `vm_ip_address` is set, the playbook reads the VM MAC from the domain XML, renders `network-config`, and passes it to `cloud-localds`. You must also supply `vm_ip_gateway` and `vm_ip_nameservers`. `vm_ip_prefix` is optional.
+When `vm_ip_address` is set, `vm_ip_gateway` and `vm_ip_nameservers` are required (the playbook fails if either is empty). `vm_ip_prefix` is optional (default `24`). Do not pass `vm_mac_address`.
 
 ```
 ansible-playbook libvirt-createvm.yml --ask-become-pass \
@@ -126,10 +126,10 @@ Override any of these with `-e` at the command line. Default values are in [`def
 | `vcpus` | Virtual CPU count |
 | `boot_mode` | `efi` or `bios` (RHEL 7 images require `bios`) |
 | `cloud_init_seed_iso` | Seed ISO filename; auto-derived as `{vm_hostname}.{vm_domain}-seed.iso` unless overridden |
-| `vm_ip_address` | Static IPv4; omit for DHCP |
-| `vm_ip_prefix` | CIDR prefix length when using static IP |
-| `vm_ip_gateway` | Default gateway when using static IP |
-| `vm_ip_nameservers` | List of DNS resolvers when using static IP |
+| `vm_ip_address` | Static IPv4; omit for DHCP. When set, `vm_ip_gateway` and `vm_ip_nameservers` are required. |
+| `vm_ip_prefix` | Optional CIDR prefix when using static IP (default `24`); ignored on DHCP. |
+| `vm_ip_gateway` | Required with `vm_ip_address`; ignored on DHCP. |
+| `vm_ip_nameservers` | Required with `vm_ip_address`; ignored on DHCP. |
 | `vm_mac_address` | Auto-set by playbook from domain XML; do not pass manually under normal use |
 | `vm_image_path` | Directory on the hypervisor where QCOW2 images and seed ISOs live; defined in [`vars/vm_image.yml`](vars/vm_image.yml) |
 
