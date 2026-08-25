@@ -1,26 +1,93 @@
 # How to use
 
+Use [`libvirt-createvm.yml`](libvirt-createvm.yml) to create a VM with an auto-generated cloud-init seed ISO in a single playbook. The playbook:
+
+1. Defines the VM (without starting it) using the `ansible-role-libvirt-vm` role
+2. Retrieves the auto-assigned MAC address from the domain XML
+3. Generates a per-VM cloud-init seed ISO (with static network config when `vm_ip_address` is set)
+4. Starts the VM when `vm_start` is truthy
+
+The libvirt domain name is `{vm_hostname}.{vm_domain}` (e.g. `rhel101.nuc.blasco.id.au` on `nuc.lan` with defaults). The disk volume in `vm-pool` is named after the short `vm_hostname` only (e.g. `rhel101`).
+
 ### Accept all defaults
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass
+ansible-playbook libvirt-createvm.yml --ask-become-pass
 ```
 
-Note: By default, the VM hostname will match the "distribution_version" (ie. distro/version) parameter:
+By default, the VM hostname matches the `distribution_version` parameter (distro/version key).
 
 ### Accept all defaults but have a different VM name
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_hostname=<vm name>"
+ansible-playbook libvirt-createvm.yml --ask-become-pass -e "vm_hostname=<vm name>"
 ```
 
 ### Accept all defaults but have a different OS version
 
 ```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>"
+ansible-playbook libvirt-createvm.yml --ask-become-pass -e "distribution_version=<rhel version>"
 ```
 
-Note: Please refer to vars/vm_image for all the available OS versions
+See [Available distributions](#available-distributions) for all supported `distribution_version` keys.
+
+### DHCP networking (no static IP)
+
+When `vm_ip_address` is omitted or empty, the integrated `generate-cloud-init-iso` role builds a seed ISO with **user-data only** (no `network-config`). The guest NIC obtains an address via **DHCP on the libvirt network** specified by `vm_host_network`.
+
+```
+ansible-playbook libvirt-createvm.yml --ask-become-pass \
+  -e hypervisor_host=hex.lan \
+  -e vm_hostname=myvm
+```
+
+### Static IP networking
+
+When `vm_ip_address` is set, the playbook reads the VM MAC from the domain XML, renders `network-config`, and passes it to `cloud-localds`. You must also supply `vm_ip_gateway` and `vm_ip_nameservers`. `vm_ip_prefix` is optional.
+
+```
+ansible-playbook libvirt-createvm.yml --ask-become-pass \
+  -e hypervisor_host=hex.lan \
+  -e "vm_host_network=vm-network-vlan140" \
+  -e vm_hostname=satellite1 \
+  -e vm_domain=savage.test \
+  -e vm_ip_address=192.168.140.12 \
+  -e vm_ip_prefix=22 \
+  -e vm_ip_gateway=192.168.140.1 \
+  -e 'vm_ip_nameservers=["192.168.140.5"]' \
+  -e vm_start=yes \
+  -e "distribution_version=rhel98" \
+  -e vcpus=8 \
+  -e disk_size=120GB \
+  -e memory_mb=24576
+```
+
+**Nameservers quoting:** use the JSON array form shown above. Ansible's `-e key=value` syntax does not YAML-parse the value, so `-e 'vm_ip_nameservers=[192.168.1.3, 192.168.1.7]'` passes a literal string and will not work as intended.
+
+### Override parameters
+
+```
+ansible-playbook libvirt-createvm.yml --ask-become-pass \
+  -e "distribution_version=<rhel version>" \
+  -e "disk_size=<size>GB" \
+  -e "memory_mb=<memory in MB>" \
+  -e "vcpus=<number of vcpus>" \
+  -e "boot_mode=<boot mode>" \
+  -e "vm_host_network=<libvirt network name>" \
+  -e "vm_start=<yes|no>" \
+  -e "vm_autostart=<yes|no>"
+```
+
+### Attach a VM to a different libvirt network
+
+By default, VMs use the `vm-network-routed` libvirt network (NAT/routed). To attach a VM to VLAN 140 instead, override `vm_host_network`:
+
+```
+ansible-playbook libvirt-createvm.yml --ask-become-pass \
+  -e "vm_host_network=vm-network-vlan140"
+```
+
+The same variable applies to `libvirt-isoinstall.yml`. The `vm-network-vlan140` network must exist on the hypervisor (defined by `config-libvirt-hpc.yml`).
 
 ### Delete a VM
 
@@ -28,7 +95,7 @@ Note: Please refer to vars/vm_image for all the available OS versions
 ansible-playbook libvirt-deletevm.yml --ask-become-pass -e "vm_hostname=<vm name>"
 ```
 
-The libvirt domain name is `{vm_hostname}.{vm_domain}` (e.g. `rhel101.nuc.blasco.id.au` on `nuc.lan` with defaults). The disk volume in `vm-pool` is named after the short `vm_hostname` only (e.g. `rhel101`). Boot firmware (EFI vs BIOS, and whether `virsh undefine --nvram` is used) is detected automatically from the domain XML when the VM exists.
+Boot firmware (EFI vs BIOS, and whether `virsh undefine --nvram` is used) is detected automatically from the domain XML when the VM exists.
 
 Optional overrides:
 
@@ -41,34 +108,30 @@ ansible-playbook libvirt-deletevm.yml --ask-become-pass \
 
 Pass `vm_domain` only if the VM was created with a non-default domain. `vm_domain` affects the libvirt domain name, not the disk volume name.
 
-Note: `libvirt-newvm.yml -e vm_state=absent` still works but is no longer the recommended path.
+# Configurable parameters
 
-### Override parameters
+Override any of these with `-e` at the command line. Default values are in [`defaults/main.yml`](defaults/main.yml).
 
-```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "distribution_version=<rhel version>" -e "disk_size=<size<>GB" -e "memory_mb=<memory in MB>" -e "vcpus=<number of vcpus>" -e "cloud_init_seed_iso=<iso file name>" -e "boot_mode=<boot mode>" -e "vm_host_network=<libvirt network name>"
-```
-
-### Attach a VM to a different libvirt network
-
-By default, VMs use the `vm-network-routed` libvirt network (NAT/routed). To attach a VM to VLAN 140 instead, override `vm_host_network`:
-
-```
-ansible-playbook libvirt-newvm.yml --ask-become-pass -e "vm_host_network=vm-network-vlan140"
-```
-
-The same variable applies to `libvirt-isoinstall.yml`. The `vm-network-vlan140` network must exist on the hypervisor (defined by `config-libvirt-hpc.yml`).
-
-# Default variables
-
-See `defaults/main.yml` for default values of:
-- Linux OS/version
-- Disk size
-- Memory
-- vCPUs
-- Boot mode (which can be `efi` or `bios`). Note: RHEL 7 hosts must be overridden to `bios`, else they will not boot
-- Cloud-init seed ISO file
-- Libvirt network (`vm_host_network`; default `vm-network-routed`)
+| Variable | Purpose |
+|----------|---------|
+| `hypervisor_host` | Inventory host to target (limits `hosts:`); omit to run against all hypervisors |
+| `distribution_version` | Key into `vm_image` dict — selects QCOW2 base image (see [Available distributions](#available-distributions)) |
+| `vm_hostname` | Short hostname; if omitted, defaults to `distribution_version` |
+| `vm_domain` | Domain suffix; FQDN = `{vm_hostname}.{vm_domain}` |
+| `vm_host_network` | Libvirt network the VM NIC attaches to |
+| `vm_autostart` | Whether libvirt autostarts the domain on hypervisor boot |
+| `vm_start` | Whether to power on the VM after seed ISO generation |
+| `disk_size` | Root disk capacity (e.g. `120GB`) |
+| `memory_mb` | RAM in megabytes |
+| `vcpus` | Virtual CPU count |
+| `boot_mode` | `efi` or `bios` (RHEL 7 images require `bios`) |
+| `cloud_init_seed_iso` | Seed ISO filename; auto-derived as `{vm_hostname}.{vm_domain}-seed.iso` unless overridden |
+| `vm_ip_address` | Static IPv4; omit for DHCP |
+| `vm_ip_prefix` | CIDR prefix length when using static IP |
+| `vm_ip_gateway` | Default gateway when using static IP |
+| `vm_ip_nameservers` | List of DNS resolvers when using static IP |
+| `vm_mac_address` | Auto-set by playbook from domain XML; do not pass manually under normal use |
+| `vm_image_path` | Directory on the hypervisor where QCOW2 images and seed ISOs live; defined in [`vars/vm_image.yml`](vars/vm_image.yml) |
 
 # Resolving JSON errors on Fedora 43+
 
@@ -88,28 +151,15 @@ Note: The character escaping shown above is required. Please do not confuse this
 
 # Available distributions
 
-See `vars/vm_image.yml`
+See [`vars/vm_image.yml`](vars/vm_image.yml) for the full `vm_image` dictionary. Each key is a valid `distribution_version` value.
 
-Note that the QCOW2 image must be available under the path described by `vm_image_path` defined in `vars/vm_image.yml`
+The QCOW2 image must be available under the path described by `vm_image_path` in that file.
 
 # Cloud-init
 
-> **Stale — scheduled for removal.** This section describes a manual `cloud-localds` workflow and an incorrect seed path (`/var/lib/libvirt/images`). See [`README.generate-cloud-init-iso-role.md`](README.generate-cloud-init-iso-role.md) for the current Ansible role and usage.
+[`libvirt-createvm.yml`](libvirt-createvm.yml) generates the cloud-init seed ISO automatically as part of VM creation. You do not need to build or copy a seed ISO beforehand.
 
-There's a default cloud-init seed iso image defined in `defaults/main.yml`
+- **DHCP:** omit `vm_ip_address` — the seed ISO contains user-data only and the guest uses DHCP on `vm_host_network`.
+- **Static IP:** set `vm_ip_address`, `vm_ip_gateway`, and `vm_ip_nameservers` (and optionally `vm_ip_prefix`). The playbook retrieves `vm_mac_address` from the domain XML before rendering network config.
 
-You can refer use the `cloud_init_seed_iso` variable to change to a different cloud-init seed image, but that image must be located in /var/lib/libvirt/images
-
-# How to generate a cloud-init seed image
-
-To generate a seed file to be used in a VM, you need the `cloud-utils-cloud-localds` package installed. Then you can use the following command to generate the image from your config file:
-
-```
-cloud-localds -v <SEED ISO FILE NAME> <CLOUD-INIT CONFIG FILE NAME>
-```
-
-e.g.
-```
-cloud-localds -v generic-seed.iso cloud_init.cfg 
-```
-
+For standalone seed ISO generation (without creating a VM), see [`README.generate-cloud-init-iso-role.md`](README.generate-cloud-init-iso-role.md).
