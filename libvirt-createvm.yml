@@ -74,7 +74,8 @@
                 type: 'file'
                 device: 'cdrom'
                 format: 'raw'
-                file_path: "{{ vm_image_path }}"
+                # No need to define the path below because it is defined in the generate-cloud-init-iso role
+                #file_path: "{{ vm_image_path }}"
             interfaces:
               - network: "{{ vm_host_network }}"
             autostart: "{{ vm_autostart }}"

@@ -24,7 +24,7 @@
 # Ensure destination directory exists and is accessible to qemu
 - name: Ensure ISO destination directory exists
   ansible.builtin.file:
-    path: "{{ vm_image_path }}"
+    path: "{{ cloud_init_seed_iso_path }}"
     state: directory
     owner: "{{ generate_cloud_init_iso_owner }}"
     group: "{{ generate_cloud_init_iso_group }}"

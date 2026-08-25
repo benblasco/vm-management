@@ -13,6 +13,7 @@ collections:
   - ansible.utils
   - community.libvirt
   - community.general
+  - fedora.linux_system_roles
 
 roles:
 # Ansible Galaxy role for configuring host as a hypervisor

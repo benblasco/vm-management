@@ -71,5 +71,5 @@
           name: "{{ libvirt_vm_fqdn }}"
           boot_firmware: "{{ detected_boot_firmware }}"
           volumes:
-            - name: "{{ vm_name }}"
+            - name: "{{ libvirt_vm_fqdn }}"
               pool: vm-pool
