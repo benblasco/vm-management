@@ -1,13 +1,13 @@
 # How to use
 
-Use [`libvirt-createvm.yml`](libvirt-createvm.yml) to create a VM with an auto-generated cloud-init seed ISO in a single playbook. The playbook:
+Use `[libvirt-createvm.yml](libvirt-createvm.yml)` to create a VM with an auto-generated cloud-init seed ISO in a single playbook. The playbook:
 
 1. Defines the VM (without starting it) using the `ansible-role-libvirt-vm` role
 2. Retrieves the auto-assigned MAC address from the domain XML
 3. Generates a per-VM cloud-init seed ISO (with static network config when `vm_ip_address` is set)
 4. Starts the VM when `vm_start` is truthy
 
-The libvirt domain name is `{vm_hostname}.{vm_domain}` (e.g. `rhel101.nuc.blasco.id.au` on `nuc.lan` with defaults). The disk volume in `vm-pool` is named after the short `vm_hostname` only (e.g. `rhel101`).
+The libvirt domain name is `{vm_hostname}.{vm_domain}` (e.g. `rhel101.nuc.blasco.id.au` on `nuc.lan` with defaults). The disk volume in `vm-pool` will also have the same name.
 
 ### Accept all defaults
 
@@ -22,6 +22,8 @@ By default, the VM hostname matches the `distribution_version` parameter (distro
 ```
 ansible-playbook libvirt-createvm.yml --ask-become-pass -e "vm_hostname=<vm name>"
 ```
+
+
 
 ### Accept all defaults but have a different OS version
 
@@ -40,6 +42,8 @@ ansible-playbook libvirt-createvm.yml --ask-become-pass \
   -e hypervisor_host=hex.lan \
   -e vm_hostname=myvm
 ```
+
+
 
 ### Static IP networking
 
@@ -78,6 +82,8 @@ ansible-playbook libvirt-createvm.yml --ask-become-pass \
   -e "vm_autostart=<yes|no>"
 ```
 
+
+
 ### Attach a VM to a different libvirt network
 
 By default, VMs use the `vm-network-routed` libvirt network (NAT/routed). To attach a VM to VLAN 140 instead, override `vm_host_network`:
@@ -110,32 +116,37 @@ Pass `vm_domain` only if the VM was created with a non-default domain. `vm_domai
 
 # Configurable parameters
 
-Override any of these with `-e` at the command line. Default values are in [`defaults/main.yml`](defaults/main.yml).
+Override any of these with `-e` at the command line. Default values are in `[defaults/main.yml](defaults/main.yml)`.
 
-| Variable | Purpose |
-|----------|---------|
-| `hypervisor_host` | Inventory host to target (limits `hosts:`); omit to run against all hypervisors |
-| `distribution_version` | Key into `vm_image` dict — selects QCOW2 base image (see [Available distributions](#available-distributions)) |
-| `vm_hostname` | Short hostname; if omitted, defaults to `distribution_version` |
-| `vm_domain` | Domain suffix; FQDN = `{vm_hostname}.{vm_domain}` |
-| `vm_host_network` | Libvirt network the VM NIC attaches to |
-| `vm_autostart` | Whether libvirt autostarts the domain on hypervisor boot |
-| `vm_start` | Whether to power on the VM after seed ISO generation |
-| `disk_size` | Root disk capacity (e.g. `120GB`) |
-| `memory_mb` | RAM in megabytes |
-| `vcpus` | Virtual CPU count |
-| `boot_mode` | `efi` or `bios` (RHEL 7 images require `bios`) |
-| `cloud_init_seed_iso` | Seed ISO filename; auto-derived as `{vm_hostname}.{vm_domain}-seed.iso` unless overridden |
-| `vm_ip_address` | Static IPv4; omit for DHCP. When set, `vm_ip_gateway` and `vm_ip_nameservers` are required. |
-| `vm_ip_prefix` | Optional CIDR prefix when using static IP (default `24`); ignored on DHCP. |
-| `vm_ip_gateway` | Required with `vm_ip_address`; ignored on DHCP. |
-| `vm_ip_nameservers` | Required with `vm_ip_address`; ignored on DHCP. |
-| `vm_mac_address` | Auto-set by playbook from domain XML; do not pass manually under normal use |
-| `vm_image_path` | Directory on the hypervisor where QCOW2 images and seed ISOs live; defined in [`vars/vm_image.yml`](vars/vm_image.yml) |
+
+| Variable               | Purpose                                                                                                                |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `hypervisor_host`      | Inventory host to target (limits `hosts:`); omit to run against all hypervisors                                        |
+| `distribution_version` | Key into `vm_image` dict — selects QCOW2 base image (see [Available distributions](#available-distributions))          |
+| `vm_hostname`          | Short hostname; if omitted, defaults to `distribution_version`                                                         |
+| `vm_domain`            | Domain suffix; FQDN = `{vm_hostname}.{vm_domain}`                                                                      |
+| `vm_host_network`      | Libvirt network the VM NIC attaches to                                                                                 |
+| `vm_autostart`         | Whether libvirt autostarts the domain on hypervisor boot                                                               |
+| `vm_start`             | Whether to power on the VM after seed ISO generation                                                                   |
+| `disk_size`            | Root disk capacity (e.g. `120GB`)                                                                                      |
+| `memory_mb`            | RAM in megabytes                                                                                                       |
+| `vcpus`                | Virtual CPU count                                                                                                      |
+| `boot_mode`            | `efi` or `bios` (RHEL 7 images require `bios`)                                                                         |
+| `cloud_init_seed_iso`  | Seed ISO filename; auto-derived as `{vm_hostname}.{vm_domain}-seed.iso` unless overridden                              |
+| `vm_ip_address`        | Static IPv4; omit for DHCP. When set, `vm_ip_gateway` and `vm_ip_nameservers` are required.                            |
+| `vm_ip_prefix`         | Optional CIDR prefix when using static IP (default `24`); ignored on DHCP.                                             |
+| `vm_ip_gateway`        | Required with `vm_ip_address`; ignored on DHCP.                                                                        |
+| `vm_ip_nameservers`    | Required with `vm_ip_address`; ignored on DHCP.                                                                        |
+| `vm_mac_address`       | Auto-set by playbook from domain XML; do not pass manually under normal use                                            |
+| `vm_image_path`        | Directory on the hypervisor where QCOW2 images and seed ISOs live; defined in `[vars/vm_image.yml](vars/vm_image.yml)` |
+
+
+
 
 # Resolving JSON errors on Fedora 43+
 
 From Fedora 43 onwards I have been getting errors when creating and destroying VMs via the playbook, which look like:
+
 ```
 TASK [ansible-role-libvirt-vm : Ensure the VM disk volumes exist] **************
 An exception occurred during task execution. To see the full traceback, use -vvv. The error was: json.decoder.JSONDecodeError: Extra data: line 2 column 1 (char 19)
@@ -143,6 +154,7 @@ fatal: [nuc.lan]: FAILED! => {"msg": "Unexpected failure during module execution
 ```
 
 This is resolved by setting the following in the inventory variables for each hypervisor:
+
 ```
 ansible_ssh_common_args: '-o SetEnv=\"TERM=dumb\"'
 ```
@@ -151,15 +163,15 @@ Note: The character escaping shown above is required. Please do not confuse this
 
 # Available distributions
 
-See [`vars/vm_image.yml`](vars/vm_image.yml) for the full `vm_image` dictionary. Each key is a valid `distribution_version` value.
+See `[vars/vm_image.yml](vars/vm_image.yml)` for the full `vm_image` dictionary. Each key is a valid `distribution_version` value.
 
 The QCOW2 image must be available under the path described by `vm_image_path` in that file.
 
 # Cloud-init
 
-[`libvirt-createvm.yml`](libvirt-createvm.yml) generates the cloud-init seed ISO automatically as part of VM creation. You do not need to build or copy a seed ISO beforehand.
+`[libvirt-createvm.yml](libvirt-createvm.yml)` generates the cloud-init seed ISO automatically as part of VM creation. You do not need to build or copy a seed ISO beforehand.
 
 - **DHCP:** omit `vm_ip_address` — the seed ISO contains user-data only and the guest uses DHCP on `vm_host_network`.
 - **Static IP:** set `vm_ip_address`, `vm_ip_gateway`, and `vm_ip_nameservers` (and optionally `vm_ip_prefix`). The playbook retrieves `vm_mac_address` from the domain XML before rendering network config.
 
-For standalone seed ISO generation (without creating a VM), see [`README.generate-cloud-init-iso-role.md`](README.generate-cloud-init-iso-role.md).
+For standalone seed ISO generation (without creating a VM), see `[README.generate-cloud-init-iso-role.md](README.generate-cloud-init-iso-role.md)`.
