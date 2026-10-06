@@ -1,3 +1,6 @@
+# ARCHIVED — ISO install workflow; use ../libvirt-createvm.yml for cloud QCOW2 + cloud-init.
+# Supported VM lifecycle: libvirt-createvm.yml and libvirt-deletevm.yml only.
+#
 # ansible-galaxy install stackhpc.libvirt-vm
 # Read: https://galaxy.ansible.com/stackhpc/libvirt-vm
 # Read: https://github.com/stackhpc/ansible-role-libvirt-vm
@@ -72,8 +75,8 @@
               target: 'hda'
           interfaces:
             - network: "{{ vm_host_network }}"
-          autostart: no
-          start: no
+          autostart: "{{ vm_autostart }}"
+          start: "{{ vm_start }}"
           boot_firmware: "{{ boot_mode }}"
           enable_guest_virtio: true
 
