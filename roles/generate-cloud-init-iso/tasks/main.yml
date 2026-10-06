@@ -45,12 +45,6 @@
       It must be included in the bootc image (provides the {{ generate_cloud_init_command }} binary).
   when: cloud_localds_pkg_check.rc != 0
 
-# Check whether a seed ISO already exists so we can decide whether to regenerate
-- name: Check whether seed ISO already exists
-  ansible.builtin.stat:
-    path: "{{ generate_cloud_init_iso_dest }}"
-  register: existing_iso
-
 # Create an ephemeral working directory to stage rendered templates
 - name: Create ephemeral working directory
   ansible.builtin.file:
@@ -76,29 +70,23 @@
   when: vm_ip_address | length > 0
 
 # Generate seed ISO without network config (DHCP / no static IP).
-# Runs when either a template was re-rendered or no ISO exists yet.
 - name: Generate seed ISO (no network config)
   ansible.builtin.command: >-
     {{ generate_cloud_init_command }} -v
     {{ generate_cloud_init_iso_dest }}
     {{ generate_cloud_init_work_dir }}/user-data.cfg
-  when:
-    - vm_ip_address | length == 0
-    - user_data_rendered.changed or not existing_iso.stat.exists
+  when: vm_ip_address | length == 0
   changed_when: true
   become: true
 
 # Generate seed ISO with network config (static IP).
-# Runs when either template was re-rendered or no ISO exists yet.
 - name: Generate seed ISO (with network config)
   ansible.builtin.command: >-
     {{ generate_cloud_init_command }} -v
     --network-config={{ generate_cloud_init_work_dir }}/network-config.cfg
     {{ generate_cloud_init_iso_dest }}
     {{ generate_cloud_init_work_dir }}/user-data.cfg
-  when:
-    - vm_ip_address | length > 0
-    - user_data_rendered.changed or network_config_rendered.changed or not existing_iso.stat.exists
+  when: vm_ip_address | length > 0
   changed_when: true
   become: true
 
@@ -117,7 +105,7 @@
     path: "{{ generate_cloud_init_work_dir }}"
     state: absent
 
-# Expose the generated ISO filename so callers can chain directly into libvirt-newvm.yml
+# Expose the generated ISO filename for libvirt-createvm.yml CD-ROM attachment
 - name: Expose generated ISO filename as fact
   ansible.builtin.set_fact:
     cloud_init_seed_iso: "{{ generate_cloud_init_iso_filename }}"

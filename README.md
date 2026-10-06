@@ -1,5 +1,7 @@
 # How to use
 
+**VM lifecycle:** use only [`libvirt-createvm.yml`](libvirt-createvm.yml) to create VMs and [`libvirt-deletevm.yml`](libvirt-deletevm.yml) to remove them. Superseded VM playbooks are under [`archive/`](archive/) (`libvirt-newvm.yml`, `libvirt-isoinstall.yml`). To test the cloud-init role alone, use [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml).
+
 Use `[libvirt-createvm.yml](libvirt-createvm.yml)` to create a VM with an auto-generated cloud-init seed ISO in a single playbook. The playbook:
 
 1. Defines the VM (without starting it) using the `ansible-role-libvirt-vm` role
@@ -93,7 +95,7 @@ ansible-playbook libvirt-createvm.yml --ask-become-pass \
   -e "vm_host_network=vm-network-vlan140"
 ```
 
-The same variable applies to `libvirt-isoinstall.yml`. The `vm-network-vlan140` network must exist on the hypervisor (defined by `config-libvirt-hpc.yml`).
+The `vm-network-vlan140` network must exist on the hypervisor (defined by `config-libvirt-hpc.yml`).
 
 ### Delete a VM
 
@@ -174,4 +176,4 @@ The QCOW2 image must be available under the path described by `vm_image_path` in
 - **DHCP:** omit `vm_ip_address` — the seed ISO contains user-data only and the guest uses DHCP on `vm_host_network`.
 - **Static IP:** set `vm_ip_address`, `vm_ip_gateway`, and `vm_ip_nameservers` (and optionally `vm_ip_prefix`). The playbook retrieves `vm_mac_address` from the domain XML before rendering network config.
 
-For standalone seed ISO generation (without creating a VM), see `[README.generate-cloud-init-iso-role.md](README.generate-cloud-init-iso-role.md)`.
+The `generate-cloud-init-iso` role runs inside `libvirt-createvm.yml` for production VM creation. To exercise the role in isolation (e.g. after template or task changes), use [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml). Implementation details: [`README.generate-cloud-init-iso-role.md`](README.generate-cloud-init-iso-role.md).

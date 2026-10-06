@@ -10,11 +10,11 @@
 #
 #   virsh dumpxml myvm.nuc.lan | grep -i mac
 #
-# Copy the seed ISO to the hypervisor path used by libvirt-newvm.yml
-# (default: /var/lib/libvirt/images/) and deploy with:
+# Copy the seed ISO to the hypervisor path used by libvirt-createvm.yml
+# (default under cloud_init_seed_iso_path in the generate-cloud-init-iso role) and deploy with:
 #
-#   ansible-playbook libvirt-newvm.yml --ask-become-pass \
-#     -e "cloud_init_seed_iso=myvm-seed.iso" \
+#   ansible-playbook libvirt-createvm.yml --ask-become-pass \
+#     -e "vm_hostname=myvm" \
 #     -e "vm_host_network=vm-network-vlan140"
 #
 version: 2

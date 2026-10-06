@@ -54,3 +54,4 @@ vm_image:
   "ubuntu24": "noble-server-cloudimg-amd64.img"
   "provisioner": "bblasco-rhis-rhel9-provisioner.qcow2"
   "bblasco-rhel-9-rhis-aap": "bblasco-rhel-9-rhis-aap.qcow2"
+  "im-train-demo": "im-train-demo.qcow2"

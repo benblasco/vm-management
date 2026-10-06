@@ -1,3 +1,6 @@
+# ARCHIVED — ISO install workflow; use ../libvirt-createvm.yml for cloud QCOW2 + cloud-init.
+# Supported VM lifecycle: libvirt-createvm.yml and libvirt-deletevm.yml only.
+#
 # ansible-galaxy install stackhpc.libvirt-vm
 # Read: https://galaxy.ansible.com/stackhpc/libvirt-vm
 # Read: https://github.com/stackhpc/ansible-role-libvirt-vm
@@ -28,21 +31,26 @@
        debug:
          msg: RHEL version is "{{ distribution_version }}" and hostname is "{{ vm_name }}"
 
-#     # Temporary action due to a bug between libvirtd and some other Linux service (dbus?)
-#     - name: Restart libvirtd
-#       become: yes
-#       service:
-#         name: libvirtd
-#         state: restarted
-#     
-#     - name: Pause while libvirtd restarts
-#       ansible.builtin.pause:
-#         seconds: 12
+     - name: Print the image path
+       debug:
+         msg: Image path is "{{ vm_image_path }}"
+
+     # Temporary action due to a bug between libvirtd and some other Linux service (dbus?)
+     - name: Restart libvirtd
+       become: yes
+       service:
+         name: libvirtd
+         state: restarted
+     
+     - name: Pause while libvirtd restarts
+       ansible.builtin.pause:
+         seconds: 12
 
   roles:
+    #- role: stackhpc.libvirt-vm
     - role: ansible-role-libvirt-vm
       libvirt_vms:
-        - state: 'present'
+        - state: "{{ vm_state | default('present') }}"
           name: "{{ vm_name }}.{{ libvirt_domain }}"
           memory_mb: "{{ memory_mb }}"
           vcpus: "{{ vcpus }}"
@@ -54,17 +62,17 @@
               # capacity: '20GB'
               capacity: "{{ disk_size }}"
               pool: 'vm-pool'
-              image: "{{ vm_image_path + vm_image [ distribution_version ] }}"
-            - name: "{{ cloud_init_seed_iso }}"
+              #image: "{{ vm_image_path + vm_image [ distribution_version ] }}"
+            #- name: 'rhel-9.3-x86_64-boot.iso'
+            - name: "install.iso"
               type: 'file'
               device: 'cdrom'
               format: 'raw'
-              # file_path sets the directory in the libvirt XML <source file=.../>;
-              # without it the role falls back to libvirt_volume_default_images_path
-              # (/var/lib/libvirt/images), which differs from vm_image_path.
-              # image: is intentionally omitted — for type: 'file' it is unused by
-              # the role but would trigger a wasteful copy to libvirt_vm_image_cache_path.
-              file_path: "{{ vm_image_path }}"
+              # File must be located in /var/lib/libvirt/images
+              # because it's getting the base name and prepending
+              # "libvirt_vm_image_cache_path" path variable
+              image: "install.iso"
+              target: 'hda'
           interfaces:
             - network: "{{ vm_host_network }}"
           autostart: "{{ vm_autostart }}"

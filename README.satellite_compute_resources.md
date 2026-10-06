@@ -78,7 +78,7 @@ Opening port 16514 in firewalld did not fix this. Investigation showed:
 
 ## Solution implemented
 
-Switched all three compute resources to `qemu+ssh://`, matching [Satellite 6.19 KVM provisioning](https://docs.redhat.com/en/documentation/red_hat_satellite/6.19/html/provisioning_hosts/provisioning_virtual_machines_on_kvm_kvm-provisioning) and the existing pattern in `[test.yml](test.yml)`.
+Switched all three compute resources to `qemu+ssh://`, matching [Satellite 6.19 KVM provisioning](https://docs.redhat.com/en/documentation/red_hat_satellite/6.19/html/provisioning_hosts/provisioning_virtual_machines_on_kvm_kvm-provisioning).
 
 ### Why `qemu+ssh` instead of `qemu+tls`
 
@@ -186,9 +186,8 @@ ansible-playbook config-libvirt-hpc.yml --limit nuc.lan,opti.lan,hex.lan
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | `[config-libvirt-hpc.yml](config-libvirt-hpc.yml)`                                     | Libvirt networks, storage pools, hypervisor baseline       |
 | `[host_vars/*/stackhpc-libvirt-host.yml](host_vars/nuc.lan/stackhpc-libvirt-host.yml)` | Per-host libvirt network IP ranges                         |
-| `[test.yml](test.yml)`                                                                 | Local Ansible libvirt tests using `qemu+ssh://bblasco@...` |
-| `[libvirt-newvm.yml](libvirt-newvm.yml)`                                               | VM creation on hypervisors                                 |
-| `[generate-cloud-init-seed.yml](generate-cloud-init-seed.yml)`                         | Cloud-init seed ISO for provisioned VMs                    |
+| `[libvirt-createvm.yml](libvirt-createvm.yml)`                                         | VM creation (cloud-init seed + MAC) on hypervisors         |
+| `[libvirt-deletevm.yml](libvirt-deletevm.yml)`                                       | VM removal on hypervisors                                  |
 
 
 
@@ -223,7 +222,7 @@ If TLS is preferred later (no SSH hop), each hypervisor would need:
 1. x509 certificates under `/etc/pki/libvirt/`
 2. `systemctl enable --now virtproxyd-tls.socket`
 3. CA certificate imported into the Satellite compute resource
-4. Firewalld `libvirt-tls` service (port 16514) — see `[firewall.yml](firewall.yml)`
+4. Firewalld `libvirt-tls` service (port 16514), e.g. `firewall-cmd --permanent --add-service=libvirt-tls`
 
 This was not implemented; SSH transport is in use and working.
 

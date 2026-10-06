@@ -2,7 +2,7 @@
 
 Ansible role that renders cloud-init templates on a hypervisor and runs `cloud-localds` to produce a per-VM seed ISO at `{{ vm_image_path }}{{ vm_hostname }}-seed.iso`.
 
-Use it before [`libvirt-newvm.yml`](libvirt-newvm.yml) when you need a dedicated seed ISO — either DHCP (user-data only) or static IP (user-data plus network-config).
+This role runs inside [`libvirt-createvm.yml`](libvirt-createvm.yml) for production VM creation. Use [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml) to test role changes without defining a libvirt domain. VM lifecycle playbooks remain `libvirt-createvm.yml` and [`libvirt-deletevm.yml`](libvirt-deletevm.yml).
 
 ## Prerequisites
 
@@ -88,57 +88,53 @@ Defined in [`roles/generate-cloud-init-iso/defaults/main.yml`](roles/generate-cl
 
 | Fact | Value |
 |------|-------|
-| `cloud_init_seed_iso` | Generated filename (for chaining into `libvirt-newvm.yml`) |
+| `cloud_init_seed_iso` | Generated filename (attached as CD-ROM by `libvirt-createvm.yml`) |
 | `generate_cloud_init_iso_path` | Full path on the hypervisor |
 
 ## Usage
 
-The example playbook is [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml). It loads both `vars/vm_image.yml` and `defaults/main.yml`.
+### Production (integrated with VM create)
+
+Run [`libvirt-createvm.yml`](libvirt-createvm.yml) — see examples below. Do not pass `vm_mac_address`; the playbook reads it from domain XML.
+
+### Role testing (seed ISO only)
+
+Run [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml) on a hypervisor after role or template edits. Static IP tests require `-e vm_mac_address=...` (unlike createvm, which discovers the MAC automatically).
 
 ### DHCP / no static IP
 
-Network-config is not injected. The seed ISO contains user-data only.
+Omit `vm_ip_address`. The seed ISO contains user-data only; the guest uses DHCP on `vm_host_network`.
 
 ```bash
-ansible-playbook generate-cloud-init-seed.yml --ask-become-pass \
+ansible-playbook libvirt-createvm.yml --ask-become-pass \
   -e hypervisor_host=nuc.lan \
   -e vm_hostname=my-rhis-vm
 ```
 
 ### Static IP
 
-Network-config is rendered and passed to `cloud-localds` via `--network-config`.
+Set `vm_ip_address`, `vm_ip_gateway`, and `vm_ip_nameservers`. Do not pass `vm_mac_address`; the playbook reads it from domain XML before this role runs.
 
 ```bash
-ansible-playbook generate-cloud-init-seed.yml --ask-become-pass \
+ansible-playbook libvirt-createvm.yml --ask-become-pass \
   -e hypervisor_host=nuc.lan \
   -e vm_hostname=my-rhis-vm \
+  -e vm_host_network=vm-network-vlan140 \
   -e vm_ip_address=192.168.140.99 \
   -e vm_ip_prefix=22 \
   -e vm_ip_gateway=192.168.140.1 \
-  -e 'vm_ip_nameservers=["192.168.1.3","192.168.1.7"]' \
-  -e vm_mac_address=52:54:00:af:bd:e4
+  -e 'vm_ip_nameservers=["192.168.1.3","192.168.1.7"]'
 ```
 
 **Nameservers quoting:** use the JSON array form shown above. Ansible's `-e key=value` syntax does not YAML-parse the value, so `-e 'vm_ip_nameservers=[192.168.1.3, 192.168.1.7]'` passes a literal string and the template will iterate it character by character. The role template includes a `from_yaml` coercion as a safety net, but the JSON form is the correct invocation.
 
-### Chain into VM creation
-
-```bash
-ansible-playbook libvirt-newvm.yml --ask-become-pass \
-  -e hypervisor_host=nuc.lan \
-  -e vm_hostname=my-rhis-vm \
-  -e cloud_init_seed_iso=my-rhis-vm-seed.iso \
-  -e vm_host_network=vm-network-vlan140
-```
-
-The role's `set_fact` sets `cloud_init_seed_iso` automatically, so you can run both playbooks in sequence without repeating the filename if you register the fact (same play) or pass it explicitly (separate runs).
-
 For VLAN 140 host networking context, see [`README.rhis-networking.md`](README.rhis-networking.md). That document's note that seed ISOs do not configure guest networking is superseded by this role when `vm_ip_address` is set.
 
-## Idempotency
+## Regeneration behavior
 
-The role skips `cloud-localds` when the seed ISO already exists and neither template changed. To force regeneration, delete the ISO on the hypervisor or change a variable that affects template output.
+Each role run re-renders templates and executes `cloud-localds`, overwriting the destination seed ISO. There is no skip when an ISO already exists. That keeps the seed aligned with the current `vm_mac_address` and other template inputs—especially when [`libvirt-createvm.yml`](libvirt-createvm.yml) reads the MAC from domain XML immediately before calling this role.
+
+Re-running the role on a **running** guest replaces the ISO on disk; the guest must run `cloud-init clean --logs` and reboot to apply the new seed (see troubleshooting below).
 
 ## Customization
 
@@ -234,8 +230,11 @@ reboot
 
 | File | Purpose |
 |------|---------|
-| [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml) | Example playbook calling the role |
-| [`libvirt-newvm.yml`](libvirt-newvm.yml) | Consumes `cloud_init_seed_iso` as a CD-ROM volume |
+| [`libvirt-createvm.yml`](libvirt-createvm.yml) | Production: define VM, run role, attach seed ISO |
+| [`libvirt-deletevm.yml`](libvirt-deletevm.yml) | Remove a VM |
+| [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml) | Test harness for this role (not VM lifecycle) |
+| [`archive/libvirt-newvm.yml`](archive/libvirt-newvm.yml) | Archived split workflow (do not use) |
+| [`archive/libvirt-isoinstall.yml`](archive/libvirt-isoinstall.yml) | Archived ISO install workflow (do not use) |
 | [`defaults/main.yml`](defaults/main.yml) | Network variable defaults and `vm_domain` |
 | [`vars/vm_image.yml`](vars/vm_image.yml) | `vm_image_path` and QCOW2 image catalogue |
 | [`README.rhis-networking.md`](README.rhis-networking.md) | VLAN 140 host networking |

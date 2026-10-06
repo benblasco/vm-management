@@ -78,23 +78,18 @@ Playbook applied to nuc.lan first, then `--limit micro.lan,opti.lan,hex.lan --sk
 ### VM creation playbooks
 
 - Added `vm_host_network` default in `defaults/main.yml` (`vm-network-routed`)
-- `libvirt-newvm.yml` and `libvirt-isoinstall.yml` now attach VMs to `{{ vm_host_network }}` instead of a hardcoded network name
+- `libvirt-createvm.yml` attaches VMs to `{{ vm_host_network }}` instead of a hardcoded network name
 - `README.md` documents the override
 
 Create a VM on VLAN 140:
 
 ```bash
-ansible-playbook libvirt-newvm.yml --ask-become-pass \
+ansible-playbook libvirt-createvm.yml --ask-become-pass \
   -e "vm_host_network=vm-network-vlan140" \
   -e "vm_hostname=my-rhis-vm"
 ```
 
-ISO-based install on VLAN 140:
-
-```bash
-ansible-playbook libvirt-isoinstall.yml --ask-become-pass \
-  -e "vm_host_network=vm-network-vlan140"
-```
+ISO-based installs previously used archived `archive/libvirt-isoinstall.yml`; use cloud QCOW2 provisioning via `libvirt-createvm.yml` instead.
 
 ### Validation
 
