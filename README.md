@@ -177,3 +177,20 @@ The QCOW2 image must be available under the path described by `vm_image_path` in
 - **Static IP:** set `vm_ip_address`, `vm_ip_gateway`, and `vm_ip_nameservers` (and optionally `vm_ip_prefix`). The playbook retrieves `vm_mac_address` from the domain XML before rendering network config.
 
 The `generate-cloud-init-iso` role runs inside `libvirt-createvm.yml` for production VM creation. To exercise the role in isolation (e.g. after template or task changes), use [`generate-cloud-init-seed.yml`](generate-cloud-init-seed.yml). Implementation details: [`README.generate-cloud-init-iso-role.md`](README.generate-cloud-init-iso-role.md).
+
+# Development
+
+Git commits run [pre-commit](https://pre-commit.com/) hooks (YAML/yamllint, ansible-lint, gitleaks, shellcheck,
+markdown). [`archive/`](archive/) is excluded from every hook; lab cloud-init under [`files/generic_vm/`](files/generic_vm/)
+and [`roles/generate-cloud-init-iso/templates/`](roles/generate-cloud-init-iso/templates/) is gitleaks-allowlisted
+(see [`.gitleaks.toml`](.gitleaks.toml)).
+
+```bash
+python3 -m pip install --user -r requirements-dev.txt
+export PATH="$HOME/.local/bin:$PATH"   # add to shell profile if needed
+pre-commit install
+pre-commit run --all-files             # first-time / CI-style check
+```
+
+Hook and lint settings: [`.pre-commit-config.yaml`](.pre-commit-config.yaml), [`.yamllint.yml`](.yamllint.yml),
+[`.ansible-lint`](.ansible-lint), [`.markdownlint-cli2.yaml`](.markdownlint-cli2.yaml).

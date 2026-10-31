@@ -1,0 +1,11 @@
+title = "vm-management"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Lab cloud-init user-data (intentional test credentials)"
+paths = [
+  '''(?i)^files/generic_vm/''',
+  '''(?i)^roles/generate-cloud-init-iso/templates/''',
+]

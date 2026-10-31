@@ -1,2 +1,5 @@
 collections/
 roles/ansible-role-libvirt-vm/
+
+# ansible-galaxy role installs (local)
+.ansible/

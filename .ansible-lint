@@ -1,0 +1,17 @@
+---
+profile: moderate
+exclude_paths:
+  - archive/
+  # Gitignored vendored role fork — lint playbooks, not upstream role content
+  - roles/ansible-role-libvirt-vm/
+  - .cache/
+  - .git/
+
+write_list:
+  - none
+
+warn_list:
+  - experimental
+
+skip_list:
+  - role-name
