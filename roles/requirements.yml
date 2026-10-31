@@ -8,4 +8,3 @@ roles:
 # https://galaxy.ansible.com/stackhpc/libvirt-vm
 #  - src: stackhpc.libvirt-vm
   - src: https://github.com/benblasco/ansible-role-libvirt-vm
-

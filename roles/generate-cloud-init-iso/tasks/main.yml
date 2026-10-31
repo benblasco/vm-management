@@ -32,7 +32,7 @@
   become: true
 
 # Verify the package is installed — bootc images are immutable, so we never install it
-- name: Check cloud-utils-cloud-localds package is installed
+- name: Check cloud-utils-cloud-localds package is installed  # noqa: command-instead-of-module
   ansible.builtin.command: rpm -q {{ generate_cloud_init_package }}
   register: cloud_localds_pkg_check
   changed_when: false

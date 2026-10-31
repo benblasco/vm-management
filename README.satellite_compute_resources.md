@@ -231,4 +231,3 @@ This was not implemented; SSH transport is in use and working.
 - [Satellite 6.19 — Provisioning virtual machines on KVM (libvirt)](https://docs.redhat.com/en/documentation/red_hat_satellite/6.19/html/provisioning_hosts/provisioning_virtual_machines_on_kvm_kvm-provisioning)
 - [RHEL 9 — libvirt remote access (SSH vs TLS)](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_virtualization/migrating-virtual-machines_configuring-and-managing-virtualization)
 - [libvirt remote support](https://libvirt.org/remote.html)
-

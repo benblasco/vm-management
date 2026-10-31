@@ -5,7 +5,7 @@ generate_cloud_init_iso_filename: "{{ cloud_init_seed_iso }}"
 # Full destination path on the hypervisor; vm_image_path must be provided by the caller
 # (e.g. by including vars/vm_image.yml in the playbook)
 cloud_init_seed_iso_path: "/var/lib/libvirt/images/"
-#generate_cloud_init_iso_dest: "{{ vm_image_path }}{{ generate_cloud_init_iso_filename }}"
+# generate_cloud_init_iso_dest: "{{ vm_image_path }}{{ generate_cloud_init_iso_filename }}"
 generate_cloud_init_iso_dest: "{{ cloud_init_seed_iso_path }}{{ generate_cloud_init_iso_filename }}"
 
 # Ephemeral working directory used to stage rendered templates before ISO generation
